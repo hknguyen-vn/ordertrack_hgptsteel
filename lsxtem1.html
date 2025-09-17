@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HGPT Steel - In Tem LSX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        /* Responsive header and search for mobile */
+        @media (max-width: 700px) {
+            .header-flex {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 12px 8px;
+                gap: 10px;
+                border-radius: 0 0 10px 10px;
+            }
+
+            .header-title {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .search-container {
+                min-width: 0;
+                max-width: 100%;
+                width: 100%;
+                margin-top: 6px;
+            }
+
+            .search-box {
+                font-size: 15px;
+                padding: 10px 40px 10px 14px;
+            }
+
+            .search-icon {
+                right: 12px;
+                font-size: 18px;
+            }
+        }
+
+        .header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 10px;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-title .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 50px 10px 20px;
+            border: 3px solid transparent;
+            border-radius: 30px;
+            font-size: 16px;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #ff9a56;
+            box-shadow: 0 5px 30px rgba(255, 154, 86, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #ff9a56;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e9ecef;
+            border-top: 5px solid #ff9a56;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media print {
+            #dataContainer {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            .container {
+                display: none !important;
+            }
+        }
+
+        .data-container {
+            padding: 10px 25px 25px;
+            overflow-y: auto;
+        }
+
+        /* ORDER LEVEL - Level 1 */
+        .order-item {
+            margin-bottom: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            background: white;
+        }
+
+        .order-header {
+            background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+            color: white;
+            padding: 10px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .order-header:hover {
+            transform: translateY(-2px);
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .order-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-summary {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .order-actions {
+            display: flex;
+            align-items: center;
+            justify-items: end;
+            gap: 15px;
+        }
+
+        .print-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .print-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .print-btn-nhom {
+            background: rgba(255, 255, 255, 0.2);
+            color: #1976d2;
+            border: 2px solid #1976d2;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .print-btn-nhom:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .expand-icon {
+            font-size: 24px;
+            transition: transform 0.2s ease;
+        }
+
+        .order-item.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .order-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: #f8f9fa;
+        }
+
+        .order-item.expanded .order-content {
+            max-height: none;
+        }
+
+        /* DISPLAY GROUP LEVEL - Level 2 */
+        .display-groups-container {
+            padding: 15px;
+        }
+
+        .display-group {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .display-group-header {
+            background: #f5f7fa;
+            /* xám xanh rất nhạt */
+            color: #1976d2;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .display-group-header:hover {
+            transform: translateY(-1px);
+        }
+
+        .display-group-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .display-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .display-group-summary {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .display-group-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f1f3f4;
+        }
+
+        /* Cho phép nội dung tự động xuống dòng, không bị cắt */
+        .component-row,
+        .component-card {
+            white-space: normal;
+            word-break: break-word;
+            overflow: visible;
+            height: auto;
+            min-height: 0;
+            max-height: none;
+            align-items: flex-start;
+        }
+
+        .display-group.expanded .display-group-content {
+            max-height: none;
+        }
+
+        /* COMPONENT LEVEL - Level 3 */
+
+        .component-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 0;
+            box-shadow: none;
+            border-bottom: 1px solid #f1f3f4;
+            background: #fff;
+            margin-bottom: 0;
+            font-size: 14px;
+            gap: 0;
+        }
+
+        .component-row:last-child {
+            border-bottom: none;
+        }
+
+        .cau-kien-tag {
+            background: #28a745;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .components-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .component-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 18px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            border-left: 4px solid #28a745;
+            margin-bottom: 0;
+            display: grid;
+            grid-template-columns: 20px 120px 120px 80px  180px 1fr;
+            gap: 15px;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        .component-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Định nghĩa layout cho từng cột */
+        .component-checkbox {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .component-column {
+            display: flex;
+            align-items: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .component-column.cau-kien-col {
+            justify-self: start;
+        }
+
+        .component-column.ten-sp-col {
+            line-height: 1.3;
+            padding-right: 10px;
+        }
+
+        .component-column.weight-col {
+            justify-self: end;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .component-column.quantity-col {
+            justify-self: center;
+            gap: 8px;
+        }
+
+        .component-column.qr-col {
+            font-size: 11px;
+            color: #888;
+            justify-self: end;
+            text-align: right;
+        }
+
+        .sl-input {
+            width: 70px !important;
+            height: 36px !important;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .sl-input:focus {
+            outline: none;
+            border-color: #ff9a56;
+            box-shadow: 0 0 0 3px rgba(255, 154, 86, 0.1);
+        }
+
+        .cau-kien-tag {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 25px;
+            margin: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .summary-bar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 10px 25px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* ===== PRINT STYLES - TEM 1 (70mm x 35mm) ===== */
+        .print-container {
+            display: none;
+        }
+
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            .print-container,
+            .print-container * {
+                visibility: visible;
+            }
+
+            .print-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100% !important;
+                height: 100% !important;
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Kích thước trang tem 70mm x 35mm */
+            @page {
+                size: 70mm 35mm;
+                margin: 0;
+            }
+
+            /* Mỗi tem chiếm toàn bộ trang */
+            .label-page {
+                width: 70mm;
+                height: 35mm;
+                page-break-after: always;
+                page-break-before: avoid;
+                page-break-inside: avoid;
+                margin: 0;
+                padding: 0 2mm 2mm 2mm;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                font-family: Arial, sans-serif;
+                background: white;
+            }
+
+            .label-page:last-child {
+                page-break-after: avoid;
+            }
+
+            /* === CÁC THÀNH PHẦN THÔNG TIN TRÊN TEM === */
+
+            /* Header - Tên khách hàng */
+            .label-header {
+                width: 80%;
+                font-size: 13px;
+                font-weight: bold;
+                line-height: 1.3;
+                color: #000;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                margin-bottom: 2mm;
+                /* CHÚ THÍCH: Đây là vùng hiển thị TÊN KHÁCH HÀNG (item.ten_kh) */
+                /* Để thêm thông tin mới vào header, có thể thêm div con hoặc sửa trong labelPage.innerHTML */
+            }
+
+            /* Container chính chứa thông tin và QR code */
+            .label-content {
+                display: flex;
+                align-items: stretch;
+                gap: 1mm;
+            }
+
+            /* Phần thông tin bên trái */
+            .label-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 1mm;
+            }
+
+            /* Tên sản phẩm */
+            .label-info .ten_sp {
+                font-size: 13px;
+                color: #000;
+                word-wrap: break-word;
+                line-height: 1.1;
+                /* CHÚ THÍCH: Đây là TÊN SẢN PHẨM (item.ten_sp) */
+                /* Hiển thị ở vị trí đầu tiên trong .label-info */
+            }
+
+            /* Mã cấu kiện - hiển thị với font đậm */
+            .label-info .component-name {
+                font-size: 13px;
+                font-weight: bold;
+                color: #000;
+                word-wrap: break-word;
+                line-height: 1.1;
+                margin-top: 4mm;
+                /* CHÚ THÍCH: Đây là MÃ CẤU KIỆN (item.cau_kien) */
+                /* Hiển thị ở vị trí thứ hai trong .label-info với font đậm và cách 4mm từ trên */
+            }
+
+            /* CHÚ THÍCH: VỊ TRÍ THÊM THÔNG TIN MỚI TRONG .label-info */
+            /* Để thêm thông tin mới, có thể thêm class CSS như sau: */
+            /*
+            .label-info .additional-info {
+                font-size: 12px;
+                color: #333;
+                word-wrap: break-word;
+                line-height: 1.2;
+                margin-top: 1mm;
+            }
+            */
+
+            /* Container QR code bên phải */
+            .qr-container {
+                width: 15mm;
+                margin-right: 4mm;
+                display: flex;
+                flex-direction: column;
+                gap: 1mm;
+                /* CHÚ THÍCH: Container chứa QR code và thông tin bổ sung */
+            }
+
+            /* Kích thước QR code */
+            .qr-container img {
+                width: 10mm !important;
+                height: 10mm !important;
+                max-width: 10mm !important;
+                max-height: 10mm !important;
+                /* CHÚ THÍCH: QR Code được tạo từ item.cau_kien_qr */
+            }
+
+            /* ID đơn hàng chi tiết dưới QR code */
+            .qr-code-id {
+                font-size: 12px;
+                color: #000;
+                line-height: 1;
+                /* CHÚ THÍCH: Đây là ID CHI TIẾT ĐƠN HÀNG (item.don_hang_ct_id) */
+                /* Hiển thị dưới QR code */
+            }
+
+            /* CHÚ THÍCH: VỊ TRÍ THÊM THÔNG TIN MỚI DƯỚI QR CODE */
+            /* Để thêm thông tin mới dưới QR code, có thể thêm class CSS như sau: */
+            /*
+            .qr-additional-info {
+                font-size: 10px;
+                color: #666;
+                text-align: center;
+                margin-top: 1mm;
+            }
+            */
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-message {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Thêm vào phần CSS */
+        .shift-mode {
+            user-select: none;
+        }
+
+        .shift-mode .component-checkbox {
+            cursor: crosshair !important;
+        }
+
+        .component-checkbox:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+        }
+
+        .drag-selecting {
+            background-color: #dbeafe !important;
+            border-left-color: #3b82f6 !important;
+        }
+
+        /* Animation cho auto-scroll */
+        .data-container {
+            scroll-behavior: smooth;
+        }
+
+        .data-container.dragging {
+            scroll-behavior: auto;
+        }
+
+        .switch-page-btns {
+            display: flex;
+            gap: 12px;
+            margin: 18px 0;
+            justify-content: flex-end;
+        }
+
+        .switch-page-btns button {
+            background: #fff;
+            color: #ff9a56;
+            border: 2px solid #ffad56;
+            border-radius: 18px;
+            padding: 9px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 154, 86, 0.12);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+
+        .switch-page-btns button:hover {
+            background: #ffad56;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(255, 154, 86, 0.22);
+        }
+
+        .switch-page-btns button.active,
+        .switch-page-btns button:disabled {
+            background: #ff9a56;
+            color: #fff;
+            border: 2px solid #ffad56;
+            cursor: default;
+            box-shadow: 0 2px 8px rgba(255, 154, 86, 0.12);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-flex">
+            <div class="header-title">
+                <h1>HGPT STEEL</h1>
+                <p class="subtitle">In Tem LSX - Tem 1</p>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchInput"
+                    placeholder="Tìm kiếm theo đơn hàng, khách hàng, sản phẩm...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="switch-page-btns">
+                <button class="active" disabled>In Tem 1</button>
+                <button onclick="window.location.href='https://poalninh.github.io/poal/tem3LSX.html'">In Tem 3</button>
+            </div>
+        </div>
+
+        <div class="summary-bar" id="summaryBar" style="display: none;">
+            <div class="summary-item">
+                <div class="summary-label">Tổng đơn hàng</div>
+                <div class="summary-value" id="totalOrders">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Tổng nhóm</div>
+                <div class="summary-value" id="totalDisplayGroups">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Tổng cấu kiện</div>
+                <div class="summary-value" id="totalComponents">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Khối lượng</div>
+                <div class="summary-value" id="totalWeight">0 kg</div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingDiv">
+            <div class="loading-spinner"></div>
+            <p>Đang tải dữ liệu từ hệ thống...</p>
+        </div>
+
+        <div class="error" id="errorDiv" style="display: none;">
+            <h4>⚠️ Có lỗi xảy ra</h4>
+            <p id="errorMessage"></p>
+        </div>
+
+        <div class="data-container" id="dataContainer" style="display: none;">
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-message">
+            <div class="loading-spinner"></div>
+            <p>Đang tạo tem... Vui lòng đợi</p>
+        </div>
+    </div>
+
+    <div class="print-container" id="printContainer">
+    </div>
+
+    <script>
+        // Constants
+        const appId = '977c97bd-47e4-441c-b564-fe28574e9d74';
+        const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+        const region = 'www';
+
+        let allData = [];
+        let filteredData = [];
+        let groupedData = {};
+
+        // Thay thế phần code xử lý Shift selection hiện tại
+        let isShiftPressed = false;
+        let lastClickedCheckbox = null;
+        let isDragging = false;
+        let dragStartCheckbox = null;
+        let autoScrollTimer = null;
+
+        // Tạo QR code bằng API
+        function generateQRCodeAPI(text, size = 300) {
+            if (!text || text.trim() === '') text = 'NO-DATA';
+            // Không loại bỏ ký tự đặc biệt, chỉ encodeURIComponent
+            return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&charset-source=UTF-8&charset-target=UTF-8`;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        async function fetchLSXData() {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/LSX/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(LSX, true)"
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('Invalid data format received');
+                return data;
+            } catch (error) {
+                console.error('Failed to fetch LSX data:', error);
+                throw error;
+            }
+        }
+
+        // Group data hierarchically: Order > Display Group > Components
+        function groupDataHierarchically(data) {
+            const grouped = {};
+
+            data.forEach(item => {
+                const orderId = item.don_hang_id || 'Không có đơn hàng';
+                const displayGroup = item.hien_thi || 'Không có nhóm hiển thị';
+
+                if (!grouped[orderId]) {
+                    grouped[orderId] = {
+                        orderId: orderId,
+                        customerName: item.ten_kh || '',
+                        displayGroups: {},
+                        totalWeight: 0,
+                        totalComponents: 0,
+                        totalDisplayGroups: 0
+                    };
+                }
+
+                if (!grouped[orderId].displayGroups[displayGroup]) {
+                    grouped[orderId].displayGroups[displayGroup] = {
+                        displayName: displayGroup,
+                        components: [],
+                        totalWeight: 0,
+                        componentCount: 0
+                    };
+                    grouped[orderId].totalDisplayGroups += 1;
+                }
+
+                grouped[orderId].displayGroups[displayGroup].components.push(item);
+
+                if (item.cau_kien && item.cau_kien.trim() !== '') {
+                    grouped[orderId].displayGroups[displayGroup].componentCount += 1;
+                    grouped[orderId].totalComponents += 1;
+                }
+
+                const weight = parseFloat(item.khoi_luong) || 0;
+                grouped[orderId].displayGroups[displayGroup].totalWeight += weight;
+                grouped[orderId].totalWeight += weight;
+            });
+
+            return grouped;
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') return '0';
+            const num = parseFloat(value);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('vi-VN');
+        }
+
+        // CHÚ THÍCH: Hàm tạo HTML cho component card trong danh sách
+        // Đây là nơi hiển thị thông tin component trên giao diện chính
+        function createComponentCardHTML(component, idx, orderId, displayGroupName) {
+            const safeId = `ck_${orderId}_${displayGroupName}_${idx}`;
+            return `
+        <div class="component-card component-row">
+            <input type="checkbox" class="component-checkbox" id="${safeId}" 
+                data-order-id="${orderId}" data-group-name="${displayGroupName}" data-idx="${idx}" checked
+                onchange="handleCheckboxChange(this)"
+                onmousedown="handleMouseDown(this, event)"
+                onmouseenter="handleMouseEnter(this, event)">
+            
+            <div class="component-column cau-kien-col">
+                <span class="cau-kien-tag">${component.cau_kien || ''}</span>
+            </div>
+            
+            <div class="component-column quantity-col">
+                <span>SL:</span>
+                <input type="number" min="1" value="${component.sl_san_xuat || 1}" 
+                    class="sl-input" data-idx="${idx}" />
+            </div>
+            
+            <div class="component-column weight-col">
+                <span>${component.khoi_luong || ''} kg</span>
+            </div>
+            
+            <div class="component-column qr-col">
+                <span>QR: ${component.cau_kien_qr || ''}</span>
+            </div>
+            
+            <div class="component-column ten-sp-col">
+                <span>${component.ten_sp || ''}</span>
+            </div>
+        </div>
+    `;
+        }
+
+        function generateSafeId(text) {
+            return text.replace(/[^a-zA-Z0-9]/g, '_');
+        }
+
+        function renderHierarchicalData(data) {
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = '';
+
+            if (Object.keys(data).length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">Không có dữ liệu để hiển thị</div>';
+                return;
+            }
+
+            Object.values(data).forEach(order => {
+                const safeOrderId = generateSafeId(order.orderId);
+                const orderElement = document.createElement('div');
+                orderElement.className = 'order-item';
+                orderElement.id = `order-${safeOrderId}`;
+
+                const displayGroupCount = Object.keys(order.displayGroups).length;
+                orderElement.innerHTML = `
+                    <div class="order-header" onclick="toggleOrderExpansion('${safeOrderId}')">
+                        <div class="order-info">
+                            <div class="order-title">
+                                <span>📋</span>
+                                <span>${order.orderId}</span>
+                            </div>
+                            <div class="order-summary">
+                                ${order.customerName} • ${displayGroupCount} nhóm • 
+                                ${order.totalComponents} cấu kiện • ${formatNumber(order.totalWeight)} kg
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="print-btn" onclick="printOrderLabels('${order.orderId}', event)">
+                                🖨️ In Tem
+                            </button>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="order-content">
+                        <div class="display-groups-container" data-order-id="${order.orderId}">
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(orderElement);
+            });
+        }
+
+        function loadDisplayGroups(orderId) {
+            const order = groupedData[orderId];
+            if (!order) return;
+
+            const container = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (!container) return;
+
+            // XÓA DÒNG: if (container.hasChildNodes()) return;
+            // Luôn clear và render lại
+            container.innerHTML = '';
+
+            Object.values(order.displayGroups).forEach(displayGroup => {
+                const safeDisplayName = generateSafeId(displayGroup.displayName);
+                const safeOrderId = generateSafeId(orderId);
+
+                const displayElement = document.createElement('div');
+                displayElement.className = 'display-group';
+
+                displayElement.innerHTML = `
+            <div class="display-group-header" onclick="toggleDisplayGroupExpansion('${orderId}', '${displayGroup.displayName}')">
+                <label onclick="event.stopPropagation();toggleSelectAllInGroup('${orderId}','${displayGroup.displayName}',this)">
+                    <input type="checkbox" style="width: 7mm; height: 6mm;" data-order-id="${orderId}" data-group-name="${displayGroup.displayName}">
+                </label>
+                <div class="display-group-info">
+                    <div class="display-group-title">
+                        <span>📁</span>
+                        <span>${displayGroup.displayName}</span>
+                    </div>
+                    <div class="display-group-summary">
+                        ${displayGroup.components.length} sản phẩm • ${displayGroup.componentCount} cấu kiện • ${formatNumber(displayGroup.totalWeight)} kg
+                    </div>
+                </div>
+                <div class="order-actions">
+                    <button class="print-btn-nhom" onclick="printCheckedComponents('${orderId}', '${displayGroup.displayName}', event)" style="background: #1976d2; color: #fff; font-size: 12px; padding: 8px 15px;">
+                        🖨️ In Nhóm
+                    </button>
+                    <span class="expand-icon">▼</span>
+                </div>
+            </div>
+            <div class="display-group-content">
+                <div class="components-container" data-display-group="${orderId}|||${displayGroup.displayName}">
+                </div>
+            </div>
+        `;
+
+                container.appendChild(displayElement);
+            });
+        }
+
+        function loadComponents(orderId, displayGroupName) {
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            order.displayGroups[displayGroupName].components.forEach((component, idx) => {
+                const componentDiv = document.createElement('div');
+                componentDiv.innerHTML = createComponentCardHTML(component, idx, orderId, displayGroupName);
+                container.appendChild(componentDiv.firstElementChild);
+            });
+        }
+
+        function toggleOrderExpansion(safeOrderId) {
+            const orderElement = document.getElementById(`order-${safeOrderId}`);
+
+            if (orderElement.classList.contains('expanded')) {
+                orderElement.classList.remove('expanded');
+            } else {
+                orderElement.classList.add('expanded');
+                const originalOrderId = Object.keys(groupedData).find(id => generateSafeId(id) === safeOrderId);
+                if (originalOrderId) {
+                    loadDisplayGroups(originalOrderId);
+                }
+            }
+        }
+
+        function toggleDisplayGroupExpansion(orderId, displayGroupName) {
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            const displayGroupElement = container.closest('.display-group');
+
+            if (displayGroupElement.classList.contains('expanded')) {
+                displayGroupElement.classList.remove('expanded');
+                container.innerHTML = ''; // Ẩn đi khi thu gọn
+            } else {
+                displayGroupElement.classList.add('expanded');
+                loadComponents(orderId, displayGroupName);
+            }
+        }
+
+        // ===== PRINT FUNCTIONS - TEM 1 (70mm x 35mm) =====
+        // CHÚ THÍCH: Hàm in tem cho toàn bộ đơn hàng
+        async function printOrderLabels(orderId, event) {
+            event.stopPropagation();
+            const group = groupedData[orderId];
+            if (!group) return;
+
+            document.getElementById('loadingOverlay').classList.add('show');
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+
+            try {
+                let labelCount = 0;
+                const fragment = document.createDocumentFragment();
+
+                // Collect all items from all display groups
+                const allItems = [];
+                Object.values(group.displayGroups).forEach(displayGroup => {
+                    allItems.push(...displayGroup.components);
+                });
+
+                // Lọc ra các item có cấu kiện
+                const validItems = allItems.filter(item => item.cau_kien && item.cau_kien.trim() !== '');
+
+                for (let i = 0; i < validItems.length; i++) {
+                    const item = validItems[i];
+                    labelCount++;
+                    const labelPage = document.createElement('div');
+
+                    // Thêm class đặc biệt cho tem cuối cùng
+                    if (i === validItems.length - 1) {
+                        labelPage.className = 'label-page last-label';
+                    } else {
+                        labelPage.className = 'label-page';
+                    }
+
+                    // CHÚ THÍCH: Tạo QR code - sử dụng item.cau_kien_qr
+                    let qrHTML = '';
+                    if (item.cau_kien_qr && item.cau_kien_qr.trim() !== '') {
+                        const qrURL = generateQRCodeAPI(item.cau_kien_qr, 600);
+                        qrHTML = `<img src="${qrURL}" alt="QR Code" style="width: 10mm; height: 10mm;" onerror="this.style.display='none'">`;
+                    } else {
+                        qrHTML = `<div style="width: 10mm; height: 10mm; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">NO QR</div>`;
+                    }
+
+                    // CHÚ THÍCH: Đây là template HTML cho mỗi tem in
+                    // Để thêm thông tin mới, sửa đổi cấu trúc HTML dưới đây
+                    labelPage.innerHTML = `
+                        <div class="label-header">${item.ten_kh || ''}</div>
+                        <div class="label-content">
+                            <div class="label-info">
+                                <div class="ten_sp">${item.ten_sp || ''}</div>
+                                <div class="component-name">${item.cau_kien || ''}</div>
+                                <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY -->
+                                <!-- Ví dụ thêm khối lượng:
+                                <div class="additional-info">${item.khoi_luong || ''} kg</div>
+                                -->
+                                <!-- Ví dụ thêm số lượng:
+                                <div class="additional-info">SL: ${item.sl_san_xuat || 1}</div>
+                                -->
+                            </div>
+                            <div class="qr-container">
+                                ${qrHTML}
+                                <div class="qr-code-id">${item.don_hang_ct_id || ''}</div>
+                                <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI DƯỚI QR CODE -->
+                                <!-- Ví dụ:
+                                <div class="qr-additional-info">${item.new_field || ''}</div>
+                                -->
+                            </div>
+                        </div>
+                    `;
+
+                    fragment.appendChild(labelPage);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                printContainer.appendChild(fragment);
+                document.getElementById('loadingOverlay').classList.remove('show');
+
+                if (labelCount > 0) {
+                    setTimeout(() => { window.print(); }, 500);
+                } else {
+                    alert('Không có cấu kiện nào để in trong đơn hàng này.');
+                }
+
+            } catch (error) {
+                console.error('Error creating labels:', error);
+                document.getElementById('loadingOverlay').classList.remove('show');
+                alert('Có lỗi xảy ra khi tạo tem. Vui lòng thử lại.');
+            }
+        }
+
+        // CHÚ THÍCH: Hàm in tem cho nhóm hiển thị (không sử dụng trong giao diện hiện tại)
+        async function printDisplayGroupLabels(orderId, displayGroupName, event) {
+            event.stopPropagation();
+
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const displayGroup = order.displayGroups[displayGroupName];
+            const componentsWithCauKien = displayGroup.components.filter(component =>
+                component.cau_kien && component.cau_kien.trim() !== ''
+            );
+
+            document.getElementById('loadingOverlay').classList.add('show');
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+
+            try {
+                let labelCount = 0;
+                const fragment = document.createDocumentFragment();
+
+                for (let item of componentsWithCauKien) {
+                    labelCount++;
+                    const labelPage = document.createElement('div');
+                    labelPage.className = 'label-page';
+
+                    // CHÚ THÍCH: Template tương tự như printOrderLabels
+                    let qrHTML = '';
+                    if (item.cau_kien_qr && item.cau_kien_qr.trim() !== '') {
+                        const qrURL = generateQRCodeAPI(item.cau_kien_qr, 600);
+                        qrHTML = `<img src="${qrURL}" alt="QR Code" style="width: 10mm; height: 10mm;" onerror="this.style.display='none'">`;
+                    } else {
+                        qrHTML = `<div style="width: 10mm; height: 10mm; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">NO QR</div>`;
+                    }
+
+                    labelPage.innerHTML = `
+                        <div class="label-header">${item.ten_kh || ''}</div>
+                        <div class="label-content">
+                            <div class="label-info">
+                                <div class="ten_sp">${item.ten_sp || ''}</div>
+                                <div class="component-name">${item.cau_kien || ''}</div>
+                                <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI (tương tự như hàm trên) -->
+                            </div>
+                            <div class="qr-container">
+                                ${qrHTML}
+                                <div class="qr-code-id">${item.don_hang_ct_id || ''}</div>
+                                <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI DƯỚI QR CODE -->
+                            </div>
+                        </div>
+                    `;
+
+                    fragment.appendChild(labelPage);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                printContainer.appendChild(fragment);
+                document.getElementById('loadingOverlay').classList.remove('show');
+
+                if (labelCount > 0) {
+                    setTimeout(() => { window.print(); }, 500);
+                } else {
+                    alert('Không có cấu kiện nào để in trong nhóm này.');
+                }
+
+            } catch (error) {
+                console.error('Error creating labels:', error);
+                document.getElementById('loadingOverlay').classList.remove('show');
+                alert('Có lỗi xảy ra khi tạo tem. Vui lòng thử lại.');
+            }
+        }
+
+        function updateSummary(data) {
+            const totalOrders = Object.keys(data).length;
+            let totalDisplayGroups = 0;
+            let totalComponents = 0;
+            let totalWeight = 0;
+
+            Object.values(data).forEach(order => {
+                totalDisplayGroups += order.totalDisplayGroups;
+                totalComponents += order.totalComponents;
+                totalWeight += order.totalWeight;
+            });
+
+            document.getElementById('totalOrders').textContent = formatNumber(totalOrders);
+            document.getElementById('totalDisplayGroups').textContent = formatNumber(totalDisplayGroups);
+            document.getElementById('totalComponents').textContent = formatNumber(totalComponents);
+            document.getElementById('totalWeight').textContent = formatNumber(totalWeight) + ' kg';
+            document.getElementById('summaryBar').style.display = 'flex';
+        }
+
+        const debouncedFilter = debounce((searchTerm) => {
+            if (!searchTerm.trim()) {
+                filteredData = allData;
+            } else {
+                const term = searchTerm.toLowerCase();
+                // CHÚ THÍCH: Để thêm field mới vào tìm kiếm, thêm vào điều kiện filter dưới đây
+                filteredData = allData.filter(item =>
+                    (item.don_hang_id && item.don_hang_id.toLowerCase().includes(term)) ||
+                    (item.ten_kh && item.ten_kh.toLowerCase().includes(term)) ||
+                    (item.ten_sp && item.ten_sp.toLowerCase().includes(term)) ||
+                    (item.cau_kien && item.cau_kien.toLowerCase().includes(term)) ||
+                    (item.hien_thi && item.hien_thi.toLowerCase().includes(term))
+                    // || (item.new_field && item.new_field.toLowerCase().includes(term))  // Thêm field mới
+                );
+            }
+
+            groupedData = groupDataHierarchically(filteredData);
+            renderHierarchicalData(groupedData);
+            updateSummary(groupedData);
+        }, 300);
+
+        function showError(message) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorDiv').style.display = 'block';
+        }
+
+        function showData() {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('dataContainer').style.display = 'block';
+        }
+
+        // CHÚ THÍCH: Hàm khởi tạo - tải dữ liệu từ API
+        async function initialize() {
+            try {
+                let data = await fetchLSXData();
+                // CHÚ THÍCH: Lọc dữ liệu - loại bỏ các dòng có lỗi
+                data = data.filter(item =>
+                    item.khoi_luong_dv &&
+                    item.cau_kien_qr &&
+                    item.khoi_luong_dv !== "#DIV/0!" &&
+                    item.cau_kien_qr !== "#DIV/0!"
+                    // && item.new_field !== "#DIV/0!"  // Thêm filter cho field mới nếu cần
+                );
+                allData = data;
+                filteredData = data;
+                groupedData = groupDataHierarchically(filteredData);
+
+                renderHierarchicalData(groupedData);
+                updateSummary(groupedData);
+                showData();
+            } catch (error) {
+                showError(`Không thể tải dữ liệu: ${error.message}`);
+            }
+        }
+        // Make functions global
+        window.toggleOrderExpansion = toggleOrderExpansion;
+        window.toggleDisplayGroupExpansion = toggleDisplayGroupExpansion;
+        window.printOrderLabels = printOrderLabels;
+        window.printDisplayGroupLabels = printDisplayGroupLabels;
+
+        function toggleSelectAllInGroup(orderId, displayGroupName, label) {
+            const groupCheckbox = label.querySelector('input[type="checkbox"]');
+            const checked = groupCheckbox.checked;
+            // Chọn tất cả hoặc bỏ chọn tất cả các cấu kiện trong nhóm
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
+            const checkboxes = container.querySelectorAll('.component-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        // CHÚ THÍCH: Hàm in tem cho các cấu kiện đã chọn trong một nhóm
+        function printCheckedComponents(orderId, displayGroupName, event) {
+            event.stopPropagation();
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const displayGroup = order.displayGroups[displayGroupName];
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
+
+            // Lấy các checkbox đã tick
+            const checkboxes = container.querySelectorAll('.component-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Vui lòng chọn ít nhất 1 cấu kiện để in!');
+                return;
+            }
+            const selectedIdx = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-idx')));
+            const selectedComponents = displayGroup.components.filter((c, idx) => selectedIdx.includes(idx));
+
+            document.getElementById('loadingOverlay').classList.add('show');
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+
+            (async () => {
+                let labelCount = 0;
+                const fragment = document.createDocumentFragment();
+                let imgPromises = [];
+
+                // CHÚ THÍCH: Xử lý từng component đã chọn và số lượng tương ứng
+                for (let item of selectedComponents) {
+                    // Lấy số lượng từ input chỉnh sửa
+                    const idx = displayGroup.components.indexOf(item);
+                    let soLuong = parseInt(item.sl_san_xuat) || 1;
+                    const input = container.querySelector(`input.sl-input[data-idx="${idx}"]`);
+                    if (input && !isNaN(parseInt(input.value))) {
+                        soLuong = parseInt(input.value);
+                    }
+
+                    // Tạo tem theo số lượng
+                    for (let i = 0; i < soLuong; i++) {
+                        labelCount++;
+                        const labelPage = document.createElement('div');
+                        labelPage.className = 'label-page';
+
+                        // CHÚ THÍCH: Tạo QR code cho từng tem được chọn
+                        let qrHTML = '';
+                        if (item.cau_kien_qr && item.cau_kien_qr.trim() !== '') {
+                            const qrURL = generateQRCodeAPI(item.cau_kien_qr, 600);
+                            qrHTML = `<img src="${qrURL}" alt="QR Code" style="width: 10mm; height: 10mm;" onerror="this.style.display='none'">`;
+                        } else {
+                            qrHTML = `<div style="width: 10mm; height: 10mm; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">NO QR</div>`;
+                        }
+
+                        // CHÚ THÍCH: Template HTML giống như hàm printOrderLabels
+                        // Để thêm thông tin mới, sửa đổi tương tự như hàm trên
+                        labelPage.innerHTML = `
+                    <div class="label-header">${item.ten_kh || ''}</div>
+                    <div class="label-content">
+                        <div class="label-info">
+                            <div class="ten_sp">${item.ten_sp || ''}</div>
+                            <div class="component-name">${item.cau_kien || ''}</div>
+                            <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY (tương tự như hàm trên) -->
+                        </div>
+                        <div class="qr-container">
+                            ${qrHTML}
+                            <div class="qr-code-id">${item.don_hang_ct_id || ''}</div>
+                            <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI DƯỚI QR CODE -->
+                        </div>
+                    </div>
+                `;
+
+                        const img = labelPage.querySelector('img');
+                        if (img) {
+                            imgPromises.push(new Promise(resolve => {
+                                img.onload = resolve;
+                                img.onerror = resolve;
+                            }));
+                        }
+
+                        fragment.appendChild(labelPage);
+                    }
+                }
+
+                printContainer.appendChild(fragment);
+                document.getElementById('loadingOverlay').classList.remove('show');
+
+                if (labelCount > 0) {
+                    // Đợi tất cả ảnh QR code trong printContainer load xong rồi mới in
+                    const imgs = printContainer.querySelectorAll('img');
+                    if (imgs.length > 0) {
+                        Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
+                            if (img.complete) resolve();
+                            else {
+                                img.onload = resolve;
+                                img.onerror = resolve;
+                            }
+                        }))).then(() => {
+                            setTimeout(() => { window.print(); }, 100);
+                        });
+                    } else {
+                        setTimeout(() => { window.print(); }, 100);
+                    }
+                } else {
+                    alert('Không có cấu kiện nào để in.');
+                }
+            })();
+        }
+
+        // Hàm auto-scroll khi kéo gần edge
+        function handleAutoScroll(e) {
+            const threshold = 50; // khoảng cách từ edge để bắt đầu scroll
+            const scrollSpeed = 5; // tốc độ scroll
+            const scrollContainer = document.querySelector('.data-container');
+
+            if (!scrollContainer || !isDragging) return;
+
+            const rect = scrollContainer.getBoundingClientRect();
+            const mouseY = e.clientY;
+
+            if (mouseY < rect.top + threshold) {
+                // Scroll lên
+                if (autoScrollTimer) clearInterval(autoScrollTimer);
+                autoScrollTimer = setInterval(() => {
+                    scrollContainer.scrollTop -= scrollSpeed;
+                }, 16);
+            } else if (mouseY > rect.bottom - threshold) {
+                // Scroll xuống
+                if (autoScrollTimer) clearInterval(autoScrollTimer);
+                autoScrollTimer = setInterval(() => {
+                    scrollContainer.scrollTop += scrollSpeed;
+                }, 16);
+            } else {
+                // Dừng scroll
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        }
+
+        // Hàm xử lý range selection thông minh (không reset các checkbox khác)
+        function handleRangeSelection(currentCheckbox) {
+            if (!lastClickedCheckbox || !isShiftPressed) return;
+
+            const orderId = currentCheckbox.getAttribute('data-order-id');
+            const groupName = currentCheckbox.getAttribute('data-group-name');
+            const lastOrderId = lastClickedCheckbox.getAttribute('data-order-id');
+            const lastGroupName = lastClickedCheckbox.getAttribute('data-group-name');
+
+            // Chỉ xử lý trong cùng một nhóm
+            if (orderId !== lastOrderId || groupName !== lastGroupName) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+            if (!container) return;
+
+            const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+            const startIndex = allCheckboxes.indexOf(lastClickedCheckbox);
+            const endIndex = allCheckboxes.indexOf(currentCheckbox);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const minIndex = Math.min(startIndex, endIndex);
+                const maxIndex = Math.max(startIndex, endIndex);
+
+                const targetState = currentCheckbox.checked;
+
+                // Chỉ thay đổi trạng thái của các checkbox trong range
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    allCheckboxes[i].checked = targetState;
+                }
+            }
+        }
+
+        // Hàm xử lý drag selection thông minh
+        function handleDragSelection(currentCheckbox) {
+            if (!isDragging || !dragStartCheckbox) return;
+
+            const orderId = currentCheckbox.getAttribute('data-order-id');
+            const groupName = currentCheckbox.getAttribute('data-group-name');
+            const dragOrderId = dragStartCheckbox.getAttribute('data-order-id');
+            const dragGroupName = dragStartCheckbox.getAttribute('data-group-name');
+
+            // Chỉ xử lý trong cùng một nhóm
+            if (orderId !== dragOrderId || groupName !== dragGroupName) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+            if (!container) return;
+
+            const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+            const startIndex = allCheckboxes.indexOf(dragStartCheckbox);
+            const endIndex = allCheckboxes.indexOf(currentCheckbox);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const minIndex = Math.min(startIndex, endIndex);
+                const maxIndex = Math.max(startIndex, endIndex);
+
+                // Lưu trạng thái hiện tại trước khi thay đổi
+                const currentStates = allCheckboxes.map(cb => cb.checked);
+
+                // Reset về trạng thái ban đầu
+                if (window.dragOriginalStates) {
+                    allCheckboxes.forEach((cb, idx) => {
+                        cb.checked = window.dragOriginalStates[idx];
+                    });
+                }
+
+                // Chọn các checkbox trong vùng drag mới
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    allCheckboxes[i].checked = true;
+                }
+            }
+        }
+
+        // Xử lý khi click checkbox
+        function handleCheckboxChange(checkbox) {
+            if (isShiftPressed && lastClickedCheckbox) {
+                // Nếu đang giữ Shift, thực hiện range selection
+                handleRangeSelection(checkbox);
+            } else {
+                // Lưu checkbox được click cuối cùng
+                lastClickedCheckbox = checkbox;
+            }
+        }
+
+        // Xử lý khi nhấn chuột xuống
+        function handleMouseDown(checkbox, event) {
+            if (isShiftPressed) {
+                event.preventDefault();
+                isDragging = true;
+                dragStartCheckbox = checkbox;
+
+                // Lưu trạng thái ban đầu của tất cả checkbox trong nhóm
+                const orderId = checkbox.getAttribute('data-order-id');
+                const groupName = checkbox.getAttribute('data-group-name');
+                const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+                if (container) {
+                    const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+                    window.dragOriginalStates = allCheckboxes.map(cb => cb.checked);
+                }
+
+                checkbox.checked = true;
+            } else {
+                lastClickedCheckbox = checkbox;
+            }
+        }
+
+        // Xử lý khi di chuột qua checkbox khác
+        function handleMouseEnter(checkbox, event) {
+            if (isShiftPressed && isDragging) {
+                handleDragSelection(checkbox);
+                handleAutoScroll(event); // Thêm auto-scroll
+            }
+        }
+
+        // Thêm event listener cho mousemove để xử lý auto-scroll
+        document.addEventListener('mousemove', function (e) {
+            if (isShiftPressed && isDragging) {
+                handleAutoScroll(e);
+            }
+        });
+
+        // Cập nhật xử lý khi thả chuột
+        document.addEventListener('mouseup', function (e) {
+            if (isShiftPressed && isDragging) {
+                isDragging = false;
+                dragStartCheckbox = null;
+                window.dragOriginalStates = null;
+
+                // Dừng auto-scroll
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        });
+
+        // Cập nhật event listeners cho Shift key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Shift') {
+                isShiftPressed = true;
+                document.body.style.cursor = 'crosshair';
+                document.body.classList.add('shift-mode');
+            }
+        });
+
+        document.addEventListener('keyup', function (e) {
+            if (e.key === 'Shift') {
+                isShiftPressed = false;
+                document.body.style.cursor = '';
+                document.body.classList.remove('shift-mode');
+                isDragging = false;
+                dragStartCheckbox = null;
+                window.dragOriginalStates = null;
+
+                // Dừng auto-scroll
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        });
+
+        // Thêm event listener để dừng auto-scroll khi chuột rời khỏi container
+        document.addEventListener('mouseleave', function (e) {
+            if (autoScrollTimer) {
+                clearInterval(autoScrollTimer);
+                autoScrollTimer = null;
+            }
+        });
+
+        // Make functions global
+        window.toggleOrderExpansion = toggleOrderExpansion;
+        window.toggleDisplayGroupExpansion = toggleDisplayGroupExpansion;
+        window.printOrderLabels = printOrderLabels;
+        window.printDisplayGroupLabels = printDisplayGroupLabels;
+        window.printCheckedComponents = printCheckedComponents;
+        window.toggleSelectAllInGroup = toggleSelectAllInGroup;
+
+        // Thêm vào cuối phần Make functions global
+        window.handleCheckboxChange = handleCheckboxChange;
+        window.handleMouseDown = handleMouseDown;
+        window.handleMouseEnter = handleMouseEnter;
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function () {
+                debouncedFilter(this.value);
+            });
+
+            initialize();
+        });
+    </script>
+</body>
+
+</html>
