@@ -34,6 +34,14 @@
                 padding: 12px 8px;
                 gap: 10px;
                 border-radius: 0 0 0px 0px;
+
+                position: sticky; /* <-- quan trọng */
+  top: 0;           /* cách mép trên 0px khi dính */
+  z-index: 9999;    /* để luôn ở trên */
+  background: linear-gradient(#f36b1f, #e56b1f); /* giữ nền */
+  color: white;
+  padding: 18px 24px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
             }
 
             .header-title {
@@ -68,14 +76,6 @@
             padding: 10px 25px;
             border-radius: 0 0 20px 20px;
             margin-bottom: 10px;
-
-            position: sticky; /* <-- quan trọng */
-            top: 0;           /* cách mép trên 0px khi dính */
-            z-index: 9999;    /* để luôn ở trên */
-            background: linear-gradient(#f36b1f, #e56b1f); /* giữ nền */
-            color: white;
-            padding: 18px 24px;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.06);
         }
 
         .header-title {
