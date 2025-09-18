@@ -647,15 +647,15 @@
 
             /* CHÚ THÍCH: VỊ TRÍ THÊM THÔNG TIN MỚI */
             /* Để thêm thông tin mới vào phần .label-info, có thể thêm div mới với class như .additional-info */
-            /* Ví dụ:
-            .label-item-horizontal .label-info .additional-info {
+           
+            .label-item-horizontal .label-info .additional-info-qc {
                 font-size: 12px;
                 color: #555;
                 word-wrap: break-word;
                 line-height: 1.2;
                 margin-top: 1mm;
             }
-            */
+            
 
             /* Container QR code bên phải */
             .label-item-horizontal .qr-container {
@@ -682,7 +682,7 @@
                 color: #000;
                 line-height: 1;
                 text-align: center;
-                /* CHÚ THÍCH: Đây là ID CHI TIẾT ĐƠN HÀNG (item.don_hang_ct_id) */
+                /* CHÚ THÍCH: Đây là ID CHI TIẾT HẠNG MỤC (item.don_hang_ct_id) */
                 /* Hiển thị dưới QR code */
             }
 
@@ -1188,11 +1188,14 @@
                                             <div class="ten_sp">${item.ten_sp || ''}</div>
                                             <div class="component-name">${item.cau_kien || ''}</div>
                                             <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY -->
-                                            <!-- Ví dụ thêm khối lượng: sua
+                                            <!-- Ví dụ thêm khối lượng:
                                             <div class="additional-info">${item.khoi_luong || ''} kg</div>
                                             -->
                                             <!-- Ví dụ thêm số lượng:
                                             <div class="additional-info">SL: ${item.sl_san_xuat || 1}</div>
+                                            -->
+                                            <!-- Ví dụ thêm quy cách:
+                                            <div class="additional-info-qc">${item.quy_cach || ''} kg</div>
                                             -->
                                         </div>
                                         <div class="qr-container">
@@ -1330,6 +1333,7 @@
                                 <div class="label-info">
                                     <div class="ten_sp">${item.ten_sp || ''}</div>
                                     <div class="component-name">${item.cau_kien || ''}</div>
+                                    div class="additional-info-qc">${item.quy_cach || ''}</div>
                                     <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY (tương tự như hàm trên) -->
                                 </div>
                                 <div class="qr-container">
