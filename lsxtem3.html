@@ -416,6 +416,14 @@
             text-align: right;
         }
 
+        .component-column.qc-col {
+            width: 200px;
+            flex-shrink: 0;
+            font-size: 14px; /*cột khối lượng*/
+            font-weight: 400;
+            text-align: right;
+        }
+
         .component-column.quantity-col {
             width: 120px;
             flex-shrink: 0;
@@ -980,7 +988,7 @@
                 <span>${component.khoi_luong || ''} kg</span>
             </div>
 
-            <div class="component-column qr-col">
+            <div class="component-column qc-col">
                 <span>${component.quy_cach || ''}</span>
             </div>
             
