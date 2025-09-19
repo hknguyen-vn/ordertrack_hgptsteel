@@ -15,15 +15,25 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-        }
+            
+            /* 1. Đặt hình nền của bạn tại đây */
+            background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=1203&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* <-- THAY ĐƯỜNG DẪN ẢNH CỦA BẠN VÀO ĐÂY */
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+            /* 2. Tùy chỉnh cách hình nền hiển thị */
+            background-size: cover;          /* Phóng to ảnh để lấp đầy toàn bộ màn hình */
+            background-position: center;     /* Căn giữa hình ảnh */
+            background-repeat: no-repeat;    /* Không lặp lại hình ảnh */
+            background-attachment: fixed;    /* Cố định hình nền khi cuộn trang, tạo hiệu ứng đẹp mắt */
+            background-color: #f0f2f5;       /* Màu nền dự phòng khi ảnh đang tải */
+                }
+
+                .container {
+                    max-width: 1400px;
+                    margin: 0 auto;
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+                    overflow: hidden;
         }
 
         /* Responsive header and search for mobile */
