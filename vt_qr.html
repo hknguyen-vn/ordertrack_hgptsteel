@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HGPT Steel - VT_QR</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      background: #f5f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+
+    h1 { margin-bottom: 20px; color: #ff6b35; }
+
+    button {
+      background: #ff6b35;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    button:hover { background: #ff8535; }
+
+    .print-container { display: none; }
+
+    @media print {
+      @page { size: 70mm 35mm; margin: 0; }
+      body * { visibility: hidden; }
+      .print-container, .print-container * { visibility: visible; }
+
+      .label-page.vtqr {
+        width: 70mm;
+        height: 35mm;
+        page-break-after: always;
+        margin: 0;
+        padding: 2mm 2mm 2mm 2mm;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 3mm;
+        background: #fff;
+      }
+
+      .vtqr-qr {
+        width: 14mm;
+        height: 14mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .vtqr-qr img {
+        width: 14mm !important;
+        height: 14mm !important;
+        max-width: 14mm !important;
+        max-height: 14mm !important;
+      }
+
+      .vtqr-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.05;
+      }
+      .vtqr-mahang {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 13.5pt;
+        font-weight: 700;
+        color: #000;
+        letter-spacing: 0.5px;
+        word-break: break-word;
+      }
+      .vtqr-tenmau {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 13.5pt;
+        font-weight: 700;
+        color: #000;
+        letter-spacing: 0.5px;
+        word-break: break-word;
+        text-transform: uppercase;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>In Tem VT_QR</h1>
+  <button onclick="printVTQR_All()">🖨️ In Toàn Bộ Tem</button>
+
+  <div class="print-container" id="printContainer"></div>
+
+  <script>
+    // ===== AppSheet API Config =====
+    const appId = '977c97bd-47e4-441c-b564-fe28574e9d74';
+    const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+    const region = 'www';
+
+    async function fetchVTQRData() {
+      try {
+        const resp = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`, {
+          method: 'POST',
+          headers: {
+            'ApplicationAccessKey': accessKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            Action: 'Find',
+            Properties: {},
+            Selector: "Filter(VT_QR, true)"
+          })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        if (!Array.isArray(data)) throw new Error('Data không hợp lệ');
+        return data;
+      } catch (e) {
+        console.error('fetchVTQRData error:', e);
+        alert('Không đọc được dữ liệu VT_QR: ' + e.message);
+        return [];
+      }
+    }
+
+    function qrFromMahang(mahang, size = 600) {
+      const v = (mahang || '').toString().trim();
+      return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(v)}`;
+    }
+
+    async function printVTQR_All() {
+      const printContainer = document.getElementById('printContainer');
+      printContainer.innerHTML = '';
+
+      try {
+        const rows = await fetchVTQRData();
+        let labelCount = 0;
+        const frag = document.createDocumentFragment();
+
+        for (const r of rows) {
+          const MAHANG = (r.MAHANG || r.mahang || '').toString().trim();
+          const TENMAU = (r.TENMAU || r.tenmau || '').toString().trim();
+          const SL = parseInt(r.SL || r.sl || 1, 10) || 1;
+          if (!MAHANG) continue;
+
+          for (let i = 0; i < SL; i++) {
+            labelCount++;
+            const page = document.createElement('div');
+            page.className = 'label-page vtqr';
+            const qrURL = qrFromMahang(MAHANG, 600);
+
+            page.innerHTML = `
+              <div class="vtqr-qr">
+                <img src="${qrURL}" alt="QR">
+              </div>
+              <div class="vtqr-text">
+                <div class="vtqr-mahang">${MAHANG}</div>
+                <div class="vtqr-tenmau">${TENMAU}</div>
+              </div>
+            `;
+            frag.appendChild(page);
+          }
+        }
+
+        printContainer.appendChild(frag);
+
+        if (labelCount === 0) {
+          alert('Không có dữ liệu hợp lệ trong VT_QR.');
+          return;
+        }
+
+        const imgs = printContainer.querySelectorAll('img');
+        if (imgs.length > 0) {
+          await Promise.all(Array.from(imgs).map(img => new Promise(res => {
+            if (img.complete) res();
+            else { img.onload = res; img.onerror = res; }
+          })));
+        }
+        setTimeout(() => window.print(), 200);
+      } catch (e) {
+        console.error(e);
+        alert('Có lỗi khi tạo tem VT_QR');
+      }
+    }
+  </script>
+</body>
+</html>
