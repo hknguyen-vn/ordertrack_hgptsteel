@@ -33,10 +33,25 @@
 
     .print-container { display: none; }
 
+    /* ===== PRINT STYLES ===== */
     @media print {
       @page { size: 70mm 35mm; margin: 0; }
+
+      body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
       body * { visibility: hidden; }
-      .print-container, .print-container * { visibility: visible; }
+
+      .print-container,
+      .print-container * { visibility: visible; }
+
+      .print-container {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;   /* bắt buộc để hiện container */
+        margin: 0 !important;
+        padding: 0 !important;
+      }
 
       .label-page.vtqr {
         width: 70mm;
@@ -101,36 +116,60 @@
   <script>
     // ===== AppSheet API Config =====
     const appId = '977c97bd-47e4-441c-b564-fe28574e9d74';
-    const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+    const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-DFCgG-v97aL';
     const region = 'www';
 
+    // Helper lấy cột theo nhiều tên
+    function pickField(obj, names = []) {
+      for (const n of names) {
+        if (obj[n] !== undefined && obj[n] !== null && obj[n] !== '') return obj[n];
+        const lc = n.toLowerCase();
+        const hit = Object.keys(obj).find(k => k.toLowerCase() === lc);
+        if (hit && obj[hit] !== '') return obj[hit];
+      }
+      return '';
+    }
+
     async function fetchVTQRData() {
-      try {
-        const resp = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`, {
+      const url = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`;
+
+      async function call(selector) {
+        const resp = await fetch(url, {
           method: 'POST',
           headers: {
             'ApplicationAccessKey': accessKey,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            Action: 'Find',
-            Properties: {},
-            Selector: "Filter(VT_QR, true)"
-          })
+          body: JSON.stringify({ Action: 'Find', Properties: {}, Selector: selector })
         });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        if (!Array.isArray(data)) throw new Error('Data không hợp lệ');
+        const text = await resp.text();
+        if (!resp.ok) throw new Error(`VT_QR HTTP ${resp.status} - ${text.slice(0,200)}`);
+        let data;
+        try { data = JSON.parse(text); } catch(e) { throw new Error('JSON parse error'); }
+        if (!Array.isArray(data)) throw new Error('Data không phải mảng');
         return data;
-      } catch (e) {
+      }
+
+      try {
+        let data = await call(`Filter(VT_QR, true)`);
+        if (data.length === 0) data = await call(`Select(VT_QR[_THISROW], true)`);
+
+        if (data.length > 0) {
+          console.log('[VT_QR] rows:', data.length);
+          console.log('[VT_QR] sample keys:', Object.keys(data[0]));
+        } else {
+          console.warn('[VT_QR] Empty array returned');
+        }
+        return data;
+      } catch(e) {
         console.error('fetchVTQRData error:', e);
-        alert('Không đọc được dữ liệu VT_QR: ' + e.message);
+        alert('Không đọc được dữ liệu VT_QR:\n' + e.message);
         return [];
       }
     }
 
-    function qrFromMahang(mahang, size = 600) {
-      const v = (mahang || '').toString().trim();
+    function qrFromMahang(mahang, size=600) {
+      const v = (mahang||'').toString().trim();
       return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(v)}`;
     }
 
@@ -138,55 +177,53 @@
       const printContainer = document.getElementById('printContainer');
       printContainer.innerHTML = '';
 
-      try {
-        const rows = await fetchVTQRData();
-        let labelCount = 0;
-        const frag = document.createDocumentFragment();
-
-        for (const r of rows) {
-          const MAHANG = (r.MAHANG || r.mahang || '').toString().trim();
-          const TENMAU = (r.TENMAU || r.tenmau || '').toString().trim();
-          const SL = parseInt(r.SL || r.sl || 1, 10) || 1;
-          if (!MAHANG) continue;
-
-          for (let i = 0; i < SL; i++) {
-            labelCount++;
-            const page = document.createElement('div');
-            page.className = 'label-page vtqr';
-            const qrURL = qrFromMahang(MAHANG, 600);
-
-            page.innerHTML = `
-              <div class="vtqr-qr">
-                <img src="${qrURL}" alt="QR">
-              </div>
-              <div class="vtqr-text">
-                <div class="vtqr-mahang">${MAHANG}</div>
-                <div class="vtqr-tenmau">${TENMAU}</div>
-              </div>
-            `;
-            frag.appendChild(page);
-          }
-        }
-
-        printContainer.appendChild(frag);
-
-        if (labelCount === 0) {
-          alert('Không có dữ liệu hợp lệ trong VT_QR.');
-          return;
-        }
-
-        const imgs = printContainer.querySelectorAll('img');
-        if (imgs.length > 0) {
-          await Promise.all(Array.from(imgs).map(img => new Promise(res => {
-            if (img.complete) res();
-            else { img.onload = res; img.onerror = res; }
-          })));
-        }
-        setTimeout(() => window.print(), 200);
-      } catch (e) {
-        console.error(e);
-        alert('Có lỗi khi tạo tem VT_QR');
+      const rows = await fetchVTQRData();
+      if (!rows || rows.length === 0) {
+        alert('Không có dữ liệu hợp lệ trong VT_QR.');
+        return;
       }
+
+      let labelCount = 0;
+      const frag = document.createDocumentFragment();
+
+      for (const r of rows) {
+        const MAHANG = (pickField(r, ['MAHANG','MaHang','MÃ HÀNG']) || '').toString().trim();
+        const TENMAU = (pickField(r, ['TENMAU','Tenmau','Tên mẫu']) || '').toString().trim();
+        const SLraw = pickField(r, ['SL','SoLuong','Số lượng']);
+        const SL = parseInt(SLraw || 1,10) || 1;
+
+        if (!MAHANG) continue;
+
+        for (let i=0; i<SL; i++) {
+          labelCount++;
+          const page = document.createElement('div');
+          page.className = 'label-page vtqr';
+          const qrURL = qrFromMahang(MAHANG,600);
+
+          page.innerHTML = `
+            <div class="vtqr-qr"><img src="${qrURL}" alt="QR"></div>
+            <div class="vtqr-text">
+              <div class="vtqr-mahang">${MAHANG}</div>
+              <div class="vtqr-tenmau">${TENMAU}</div>
+            </div>`;
+          frag.appendChild(page);
+        }
+      }
+
+      if (labelCount===0) {
+        alert('Có dữ liệu nhưng không tìm thấy cột MAHANG/SL phù hợp.\nXem console (F12) để kiểm tra tên cột thực tế.');
+        return;
+      }
+
+      printContainer.appendChild(frag);
+
+      const imgs = printContainer.querySelectorAll('img');
+      if (imgs.length>0) {
+        await Promise.all(Array.from(imgs).map(img => new Promise(res => {
+          if (img.complete) res(); else { img.onload=res; img.onerror=res; }
+        })));
+      }
+      setTimeout(()=>window.print(),200);
     }
   </script>
 </body>
