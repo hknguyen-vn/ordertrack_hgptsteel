@@ -31,27 +31,40 @@
 
    @media print {
   @page { size: var(--page-w) var(--page-h); margin: 0; }
-  body { background: #fff; }
   body * { visibility: hidden; }
   .print-container, .print-container * { visibility: visible; }
   .print-container { position: absolute; inset: 0; display: block; }
 
-  .label { 
-    width: var(--page-w); height: var(--page-h);
-    page-break-after: always; margin: 0; padding: var(--pad);
-    display: flex;
-    align-items: center;      /* canh giữa theo chiều dọc */
-    justify-content: flex-start;  /* giữ QR + text sát bên trái */
-    gap: var(--gap);
+  .label{
+    position: relative;
+    width: var(--page-w);
+    height: var(--page-h);
+    margin: 0;
+    padding: 0;                 /* bỏ padding dọc để canh chính giữa thật */
     background: #fff;
+    page-break-after: always;
+    box-sizing: border-box;
   }
 
-  .qr { width: var(--qr); height: var(--qr); display: flex; align-items: center; justify-content: center; }
-  .qr img { width: var(--qr); height: var(--qr); display: block; }
+  /* HÀNG NỘI DUNG: luôn nằm đúng giữa tem theo chiều dọc */
+  .label .row{
+    position: absolute;
+    top: 50%;
+    left: var(--pad);
+    right: var(--pad);
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;         /* canh giữa QR và text theo trục dọc của hàng */
+    gap: var(--gap);
+  }
 
-  .text { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; }
+  .qr { width: var(--qr); height: var(--qr); display:flex; align-items:center; justify-content:center; }
+  .qr img { width: var(--qr); height: var(--qr); display:block; }  /* block để không có “đệm” dưới ảnh */
+
+  .text { line-height: 1.05; }
   .ma  { font-family: var(--font); font-weight: 700; font-size: 14pt; }
   .ten { font-family: var(--font); font-weight: 700; font-size: 12pt; text-transform: uppercase; }
+}{ font-family: var(--font); font-weight: 700; font-size: 12pt; text-transform: uppercase; }
 }
   </style>
 </head>
