@@ -37,13 +37,10 @@
       .print-container { position: absolute; inset: 0; display: block; }
 
       .label { 
-        position: relative;
-        width: var(--page-w);
-        height: var(--page-h);
-        margin: 0; padding: 0;
-        background: #fff;
-        page-break-after: always;
-        box-sizing: border-box;
+        width: var(--page-w); height: var(--page-h);
+        page-break-after: always; margin: 0; padding: var(--pad);
+        display: flex; gap: var(--gap); background: #fff;
+        border: 0;
       }
       .label .row{
     position: absolute;
