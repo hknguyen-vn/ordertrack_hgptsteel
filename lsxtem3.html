@@ -1412,6 +1412,8 @@
                         }))).then(() => {
                             setTimeout(() => { window.print(); }, 100);
                         });
+                    statusEl.textContent = `Đã tạo ${total} tem • mở hộp thoại in...`;
+                    setTimeout(() => { window.print(); statusEl.textContent = 'Sẵn sàng'; }, 120);
                     } else {
                         setTimeout(() => { window.print(); }, 100);
                     }
