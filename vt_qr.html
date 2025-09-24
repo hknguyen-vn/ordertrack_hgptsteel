@@ -43,6 +43,17 @@
         border: 0;
         justify-content: flex-start;
       }
+      .label .row{
+    position: absolute;
+    top: 50%;
+    left: var(--pad);
+    right: var(--pad);
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-columns: var(--qr) 1fr; /* QR cố định | Text chiếm phần còn lại */
+    align-items: center;                  /* canh giữa theo chiều dọc */
+    column-gap: var(--gap);
+  }
       .qr { width: var(--qr); height: var(--qr); display: flex; align-items: center; justify-content: center; }
       .qr img { width: var(--qr) !important; height: var(--qr) !important; }
 
