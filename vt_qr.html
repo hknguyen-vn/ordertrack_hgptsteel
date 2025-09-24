@@ -100,7 +100,7 @@
     }
 
     // Tạo URL QR từ MAHANG
-    function qrURL(mahang, size=600) {
+    function qrURL(mahang, size=400) {
       const v = (mahang || '').toString().trim();
       return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(v)}`;
     }
