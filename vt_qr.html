@@ -36,27 +36,28 @@
   .print-container{ position:absolute; inset:0; display:block }
 
   .label{
-    position:relative; width:var(--page-w); height:var(--page-h);
-    margin:0; padding:var(--pad); page-break-after:always; background:#fff;
-  }
+    width: var(--page-w); height: var(--page-h);
+    page-break-after: always;
+    margin: 0; padding: var(--pad); background:#fff;
 
-  /* HÀNG NỘI DUNG = 2 CỘT: [QR cố định] [TEXT linh hoạt] */
-  .row{
-    position:absolute; left:var(--pad); right:var(--pad); top:50%;
-    transform:translateY(-50%);
-    display:grid;
-    grid-template-columns: var(--qr) 1fr;  /* tách 2 cột rõ ràng */
-    align-items:center;                    /* canh giữa theo chiều dọc */
-    column-gap: var(--gap);                /* khoảng cách giữa QR và text */
+    /* 2 cột: [QR cố định] [Text giãn] + CĂN GIỮA THEO CHIỀU DỌC */
+    display: grid;
+    grid-template-columns: var(--qr) 1fr;  /* tách QR | TEXT */
+    column-gap: var(--gap);
+
+    align-items: center;   /* canh giữa các item trong hàng */
+    align-content: center; /* canh giữa toàn bộ khối theo chiều dọc tem */
+    justify-items: start;  /* giữ canh trái theo chiều ngang */
   }
 
   .qr{ width:var(--qr); height:var(--qr); display:flex; align-items:center; justify-content:center }
-  .qr img{ width:var(--qr); height:var(--qr); display:block }  /* tránh dính baseline */
+  .qr img{ width:var(--qr); height:var(--qr); display:block }
 
-  .text{ line-height:1.08; white-space:normal; }
+  .text{ line-height:1.08 }
   .ma{  font-family:var(--font); font-weight:700; font-size:14pt }
   .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase }
 }
+
   </style>
 </head>
 <body>
