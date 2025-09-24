@@ -76,7 +76,7 @@
     // Lấy dữ liệu VT_QR từ AppSheet
     async function fetchVTQR() {
       const url = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`;
-      const body = { Action: 'Find', Properties: {}, Selector: 'Filter(VT_QR, OR(ISBLANK([CHUNGLOAI]), [CHUNGLOAI] = "", LEN(TRIM(TEXT([CHUNGLOAI]))) = 0))' };
+      const body = { Action: 'Find', Properties: {}, Selector: 'Filter(VT_QR, true' };
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'ApplicationAccessKey': accessKey, 'Content-Type': 'application/json' },
