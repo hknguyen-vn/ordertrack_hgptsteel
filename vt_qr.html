@@ -37,18 +37,14 @@
 
   /* 2 cột: [QR cố định] | [Text giãn] */
   .label{
-  width: 70mm;
-                height: 35mm;
-                page-break-after: always;
-                page-break-before: avoid;
-                page-break-inside: avoid;
-                margin: 0;
-                padding: 0 2mm 2mm 2mm;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                font-family: Arial, sans-serif;
-                background: white;
+    width: var(--page-w); height: var(--page-h);
+    page-break-after: always;
+    margin:0; padding: var(--pad);
+    display:flex;
+    align-items:center;          /* căn giữa theo chiều dọc */
+    justify-content:flex-start;  /* bám trái */
+    gap: var(--gap);
+    background:#fff;
   }
 
   /* KHÓA bề ngang cột QR để text không rớt xuống dưới */
