@@ -29,64 +29,45 @@
     /* Khu in */
     .print-container { display: none; }
 
-    /* ===== PRINT - tem 70x35mm căn giữa, 2 cột QR | TEXT ===== */
-@media print {
-  * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+    @media print{
+  @page{ size: var(--page-w) var(--page-h); margin:0 }
+  body *{ visibility:hidden }
+  .print-container, .print-container *{ visibility:visible }
+  .print-container{ position:absolute; inset:0; display:block }
 
-  body { margin:0 !important; padding:0 !important; background:#fff !important; }
-  body * { visibility:hidden; }
-
-  .print-container, .print-container * { visibility:visible; }
-  .print-container { position:absolute; left:0; top:0; width:100% !important; height:100% !important; display:block !important; margin:0 !important; padding:0 !important; }
-
-  @page { size: 70mm 35mm; margin:0; }
-
-  /* Mỗi tem */
-  .label-page {
-    width: 70mm; height: 35mm;
-    page-break-after: always; page-break-before: avoid; page-break-inside: avoid;
-    margin:0; padding: 2mm;           /* viền in */
-    box-sizing: border-box;
-    display:flex; flex-direction: column;
-    justify-content: center;           /* CĂN GIỮA THEO CHIỀU DỌC TOÀN TEM */
-    font-family: Arial, sans-serif; background:#fff;
-  }
-  .label-page:last-child { page-break-after: avoid; }
-
-  /* Ẩn header nếu không cần; nếu cần, giữ display:block */
-  .label-header { display:none; }
-
-  /* Vùng nội dung chính: 2 cột – QR cố định | TEXT giãn */
-  .label-content{
-    display:grid;
-    grid-template-columns: 12mm 1fr;   /* QR ~10mm + đệm, Text chiếm phần còn lại */
-    align-items:center;                /* CĂN GIỮA THEO CHIỀU DỌC TRONG HÀNG */
-    column-gap: 2mm;
+  /* 2 cột: [QR cố định] | [Text giãn] */
+  .label{
+    width: var(--page-w); height: var(--page-h);
+    page-break-after: always;
+    margin:0; padding: var(--pad);
+    display:flex;
+    align-items:center;          /* căn giữa theo chiều dọc */
+    justify-content:flex-start;  /* bám trái */
+    gap: var(--gap);
+    background:#fff;
   }
 
-  /* Cột QR – KHÓA bề ngang để Text không rớt xuống dưới */
-  .qr-container{
-    width: 12mm;                       /* khớp grid-template-columns */
+  /* KHÓA bề ngang cột QR để text không rớt xuống dưới */
+  .qr{
+    flex: 0 0 var(--qr);         /* không co giãn, đúng = var(--qr) */
+    width: var(--qr);
+    height: var(--qr);
     display:flex; align-items:center; justify-content:center;
   }
-  .qr-container img{
-    width: 10mm !important;
-    height: 10mm !important;
-    max-width: 10mm !important;
-    max-height: 10mm !important;
+  .qr img{
     display:block;
+    width: 100% !important;
+    height: 100% !important;
   }
 
-  /* Cột Text */
-  .label-info{
-    min-width:0;                       /* tránh tràn gây vỡ hàng */
-    display:flex; flex-direction:column; justify-content:center; gap: 1mm;
-    line-height:1.1;
+  /* Cột text chiếm phần còn lại, không tràn xuống dưới QR */
+  .text{
+    flex: 1 1 0;
+    min-width: 0;                /* tránh đẩy rớt dòng bất thường */
+    line-height: 1.06;
   }
-  .label-info .ten_sp{ font-size:13px; color:#000; }
-  .label-info .component-name{ font-size:13px; font-weight:700; color:#000; }
-  /* ID dưới QR (nếu muốn hiển thị) */
-  .qr-code-id{ font-size:12px; color:#000; line-height:1; text-align:center; }
+  .ma  { font-family: var(--font); font-weight:700; font-size:14pt; }
+  .ten { font-family: var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
 }
   </style>
 </head>
