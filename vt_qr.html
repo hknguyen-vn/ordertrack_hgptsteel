@@ -39,32 +39,31 @@
     position: relative;
     width: var(--page-w);
     height: var(--page-h);
-    margin: 0;
-    padding: 0;                 /* bỏ padding dọc để canh chính giữa thật */
+    margin: 0; padding: 0;
     background: #fff;
     page-break-after: always;
     box-sizing: border-box;
   }
 
-  /* HÀNG NỘI DUNG: luôn nằm đúng giữa tem theo chiều dọc */
+  /* HÀNG NỘI DUNG = GRID 2 CỘT (QR | TEXT), căn GIỮA THEO CHIỀU DỌC */
   .label .row{
     position: absolute;
     top: 50%;
     left: var(--pad);
     right: var(--pad);
     transform: translateY(-50%);
-    display: flex;
-    align-items: center;         /* canh giữa QR và text theo trục dọc của hàng */
-    gap: var(--gap);
+    display: grid;
+    grid-template-columns: var(--qr) 1fr; /* QR cố định | Text chiếm phần còn lại */
+    align-items: center;                  /* canh giữa theo chiều dọc */
+    column-gap: var(--gap);
   }
 
   .qr { width: var(--qr); height: var(--qr); display:flex; align-items:center; justify-content:center; }
-  .qr img { width: var(--qr); height: var(--qr); display:block; }  /* block để không có “đệm” dưới ảnh */
+  .qr img { width: var(--qr); height: var(--qr); display:block; }
 
-  .text { line-height: 1.05; }
+  .text { line-height: 1.1; }
   .ma  { font-family: var(--font); font-weight: 700; font-size: 14pt; }
   .ten { font-family: var(--font); font-weight: 700; font-size: 12pt; text-transform: uppercase; }
-}{ font-family: var(--font); font-weight: 700; font-size: 12pt; text-transform: uppercase; }
 }
   </style>
 </head>
