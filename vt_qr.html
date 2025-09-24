@@ -35,29 +35,40 @@
   .print-container, .print-container *{ visibility:visible }
   .print-container{ position:absolute; inset:0; display:block }
 
+  /* 2 cột: [QR cố định] | [Text giãn] */
   .label{
     width: var(--page-w); height: var(--page-h);
     page-break-after: always;
-    margin: 0; padding: var(--pad); background:#fff;
-
-    /* 2 cột: [QR cố định] [Text giãn] + CĂN GIỮA THEO CHIỀU DỌC */
-    display: grid;
-    grid-template-columns: var(--qr) 1fr;  /* tách QR | TEXT */
-    column-gap: var(--gap);
-
-    align-items: center;   /* canh giữa các item trong hàng */
-    align-content: center; /* canh giữa toàn bộ khối theo chiều dọc tem */
-    justify-items: start;  /* giữ canh trái theo chiều ngang */
+    margin:0; padding: var(--pad);
+    display:flex;
+    align-items:center;          /* căn giữa theo chiều dọc */
+    justify-content:flex-start;  /* bám trái */
+    gap: var(--gap);
+    background:#fff;
   }
 
-  .qr{ width:var(--qr); height:var(--qr); display:flex; align-items:center; justify-content:center }
-  .qr img{ width:var(--qr); height:var(--qr); display:block }
+  /* KHÓA bề ngang cột QR để text không rớt xuống dưới */
+  .qr{
+    flex: 0 0 var(--qr);         /* không co giãn, đúng = var(--qr) */
+    width: var(--qr);
+    height: var(--qr);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qr img{
+    display:block;
+    width: 100% !important;
+    height: 100% !important;
+  }
 
-  .text{ line-height:1.08 }
-  .ma{  font-family:var(--font); font-weight:700; font-size:14pt }
-  .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase }
+  /* Cột text chiếm phần còn lại, không tràn xuống dưới QR */
+  .text{
+    flex: 1 1 0;
+    min-width: 0;                /* tránh đẩy rớt dòng bất thường */
+    line-height: 1.06;
+  }
+  .ma  { font-family: var(--font); font-weight:700; font-size:14pt; }
+  .ten { font-family: var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
 }
-
   </style>
 </head>
 <body>
