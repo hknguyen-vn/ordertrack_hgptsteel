@@ -29,27 +29,30 @@
     /* Khu in */
     .print-container { display: none; }
 
-    @media print {
-      @page { size: var(--page-w) var(--page-h); margin: 0; }
-      body { background: #fff; }
-      body * { visibility: hidden; }
-      .print-container, .print-container * { visibility: visible; }
-      .print-container { position: absolute; inset: 0; display: block; }
+   @media print {
+  @page { size: var(--page-w) var(--page-h); margin: 0; }
+  body { background: #fff; }
+  body * { visibility: hidden; }
+  .print-container, .print-container * { visibility: visible; }
+  .print-container { position: absolute; inset: 0; display: block; }
 
-      .label { 
-        width: var(--page-w); height: var(--page-h);
-        page-break-after: always; margin: 0; padding: var(--pad);
-        display: flex; align-items: center; gap: var(--gap); background: #fff;
-        border: 0;
-        justify-content: flex-start;
-      }
-      .qr { width: var(--qr); height: var(--qr); display: flex; align-items: center; justify-content: center; }
-      .qr img { width: var(--qr) !important; height: var(--qr) !important; }
+  .label { 
+    width: var(--page-w); height: var(--page-h);
+    page-break-after: always; margin: 0; padding: var(--pad);
+    display: flex;
+    align-items: center;      /* canh giữa theo chiều dọc */
+    justify-content: flex-start;  /* giữ QR + text sát bên trái */
+    gap: var(--gap);
+    background: #fff;
+  }
 
-      .text { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; line-height: 1.05; }
-      .ma { font-family: var(--font); font-weight: 700; font-size: 14pt; color: #000; word-break: break-word; }
-      .ten { font-family: var(--font); font-weight: 700; font-size: 12pt; color: #000; word-break: break-word; text-transform: uppercase; }
-    }
+  .qr { width: var(--qr); height: var(--qr); display: flex; align-items: center; justify-content: center; }
+  .qr img { width: var(--qr); height: var(--qr); display: block; }
+
+  .text { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; }
+  .ma  { font-family: var(--font); font-weight: 700; font-size: 14pt; }
+  .ten { font-family: var(--font); font-weight: 700; font-size: 12pt; text-transform: uppercase; }
+}
   </style>
 </head>
 <body>
