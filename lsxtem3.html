@@ -15,25 +15,32 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            
+
             /* 1. Đặt hình nền của bạn tại đây */
-            background-image: url('https://images.unsplash.com/photo-1739088033117-15f66e6d2090?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* <-- THAY ĐƯỜNG DẪN ẢNH CỦA BẠN VÀO ĐÂY */
+            background-image: url('https://images.unsplash.com/photo-1739088033117-15f66e6d2090?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            /* <-- THAY ĐƯỜNG DẪN ẢNH CỦA BẠN VÀO ĐÂY */
 
             /* 2. Tùy chỉnh cách hình nền hiển thị */
-            background-size: cover;          /* Phóng to ảnh để lấp đầy toàn bộ màn hình */
-            background-position: center;     /* Căn giữa hình ảnh */
-            background-repeat: no-repeat;    /* Không lặp lại hình ảnh */
-            background-attachment: fixed;    /* Cố định hình nền khi cuộn trang, tạo hiệu ứng đẹp mắt */
-            background-color: #f0f2f5;     /* Màu nền dự phòng khi ảnh đang tải */
-                }
+            background-size: cover;
+            /* Phóng to ảnh để lấp đầy toàn bộ màn hình */
+            background-position: center;
+            /* Căn giữa hình ảnh */
+            background-repeat: no-repeat;
+            /* Không lặp lại hình ảnh */
+            background-attachment: fixed;
+            /* Cố định hình nền khi cuộn trang, tạo hiệu ứng đẹp mắt */
+            background-color: #f0f2f5;
+            /* Màu nền dự phòng khi ảnh đang tải */
+        }
 
-                .container {
-                    max-width: 1400px;
-                    margin: 0 auto;
-                    background: rgba(255, 255, 255, 0.8); /*Độ trong suốt trắng đục*/
-                    border-radius: 20px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-                    overflow: hidden;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.8);
+            /*Độ trong suốt trắng đục*/
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
         }
 
         /* Responsive header and search for mobile */
@@ -419,9 +426,10 @@
         }
 
         .component-column.weight-col {
-            width: 70px; 
+            width: 70px;
             flex-shrink: 0;
-            font-size: 14px; /*cột khối lượng*/
+            font-size: 14px;
+            /*cột khối lượng*/
             font-weight: 400;
             text-align: right;
         }
@@ -429,9 +437,10 @@
         .component-column.qc-col {
             width: 200px;
             flex-shrink: 0;
-            font-size: 14px; /*cột quy cách*/
+            font-size: 14px;
+            /*cột quy cách*/
             font-weight: 500;
-            color:darkred;
+            color: darkred;
             text-align: right;
         }
 
@@ -655,7 +664,8 @@
 
             /* 3. Mã cấu kiện */
             .label-item-horizontal .label-info .component-name {
-                font-size: 12px;  /* chỉnh size ở đây dang là 13  */
+                font-size: 12px;
+                /* chỉnh size ở đây dang là 13  */
                 font-weight: bold;
                 color: #000;
                 word-wrap: break-word;
@@ -667,7 +677,7 @@
 
             /* CHÚ THÍCH: VỊ TRÍ THÊM THÔNG TIN MỚI */
             /* Để thêm thông tin mới vào phần .label-info, có thể thêm div mới với class như .additional-info */
-           
+
             .label-item-horizontal .label-info .additional-info {
                 font-size: 11px;
                 color: #000;
@@ -676,7 +686,7 @@
                 line-height: 1.2;
                 margin-top: 1mm;
             }
-            
+
 
             /* Container QR code bên phải */
             .label-item-horizontal .qr-container {
@@ -816,12 +826,13 @@
                 <p class="subtitle">In Tem - Tem 3</p>
             </div>
             <div class="search-container">
-                <input type="text" class="search-box" id="searchInput"
-                    placeholder="Tìm LSX, Cấu kiện, KH...">
+                <input type="text" class="search-box" id="searchInput" placeholder="Tìm LSX, Cấu kiện, KH...">
                 <span class="search-icon">🔍</span>
             </div>
             <div class="switch-page-btns">
-                <button onclick="window.location.href='https://hknguyen-vn.github.io/ordertrack_hgptsteel/lsxtem1.html'">In Tem 1</button>
+                <button
+                    onclick="window.location.href='https://hknguyen-vn.github.io/ordertrack_hgptsteel/lsxtem1.html'">In
+                    Tem 1</button>
                 <button class="active" disabled>In Tem 3</button>
             </div>
         </div>
@@ -935,6 +946,7 @@
                     grouped[orderId] = {
                         orderId: orderId,
                         customerName: item.ten_kh || '',
+                        loai_lenh: item.loai_lenh || '',
                         displayGroups: {},
                         totalWeight: 0,
                         totalComponents: 0,
@@ -1040,7 +1052,7 @@
                         <div class="order-info">
                             <div class="order-title">
                                 <span>📋</span>
-                                <span>${order.orderId}</span>
+                                <span>${order.orderId} - ${order.loai_lenh} </span>
                             </div>
                             <div class="order-summary">
                                 ${order.customerName} • ${displayGroupCount} hạng mục • 
@@ -1073,7 +1085,12 @@
 
             container.innerHTML = '';
 
-            Object.values(order.displayGroups).forEach(displayGroup => {
+            // ← THÊM ĐOẠN NÀY: Sắp xếp displayGroups từ Z > A
+            const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
+                return b.displayName.localeCompare(a.displayName, 'vi'); // Z > A
+            });
+
+            sortedDisplayGroups.forEach(displayGroup => {
                 const safeDisplayName = generateSafeId(displayGroup.displayName);
                 const safeOrderId = generateSafeId(orderId);
 
