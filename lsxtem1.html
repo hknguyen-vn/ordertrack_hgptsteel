@@ -420,9 +420,12 @@
         }
 
         .component-column.weight-col {
-            justify-self: end;
+            width: 70px;
+            flex-shrink: 0;
+            font-size: 14px;
+            /*cột khối lượng*/
+            font-weight: 400;
             text-align: right;
-            font-weight: 500;
         }
 
         .component-column.qc-col {
@@ -436,28 +439,31 @@
         }
 
         .component-column.quantity-col {
-            justify-self: center;
+            width: 120px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
         .component-column.qr-col {
-            font-size: 11px;
+            width: 180px;
+            flex-shrink: 0;
+            font-size: 10px;
             color: #888;
-            justify-self: end;
             text-align: right;
         }
 
         .sl-input {
-            width: 70px !important;
-            height: 36px !important;
+            width: 90px !important;
+            height: 35px !important;
             border: 2px solid #ddd;
             border-radius: 8px;
-            padding: 6px 10px;
+            padding: 5px 8px;
             font-size: 14px;
             font-weight: 600;
             text-align: center;
             transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .sl-input:focus {
@@ -966,6 +972,10 @@
             
             <div class="component-column weight-col">
                 <span>${component.khoi_luong || ''} kg</span>
+            </div>
+
+            <div class="component-column qc-col">
+                <span>${component.quy_cach || ''}</span>
             </div>
 
             <div class="component-column ten-sp-col">
