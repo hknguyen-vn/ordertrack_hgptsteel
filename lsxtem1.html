@@ -961,10 +961,6 @@
             <div class="component-column qr-col">
                 <span>QR: ${component.cau_kien_qr || ''}</span>
             </div>
-
-            <div class="component-column qc-col">
-                <span>${component.quy_cach || ''}</span>
-            </div>
             
             <div class="component-column ten-sp-col">
                 <span>${component.ten_sp || ''}</span>
@@ -1170,6 +1166,7 @@
                             <div class="label-info">
                                 <div class="ten_sp">${item.ten_sp || ''}</div>
                                 <div class="component-name">${item.cau_kien || ''}</div>
+                                <div class="additional-info">${item.quy_cach || ''}</div>
                                 <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY -->
                                 <!-- Ví dụ thêm khối lượng:
                                 <div class="additional-info">${item.khoi_luong || ''} kg</div>
@@ -1177,6 +1174,7 @@
                                 <!-- Ví dụ thêm số lượng:
                                 <div class="additional-info">SL: ${item.sl_san_xuat || 1}</div>
                                 -->
+                                <div class="additional-info">${item.quy_cach || ''}</div>
                             </div>
                             <div class="qr-container">
                                 ${qrHTML}
