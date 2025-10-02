@@ -1085,9 +1085,22 @@
 
             container.innerHTML = '';
 
-            // ← THÊM ĐOẠN NÀY: Sắp xếp displayGroups từ Z > A
+            // Sắp xếp displayGroups Z > A theo số cuối cùng trong tên
             const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
-                return b.displayName.localeCompare(a.displayName, 'vi'); // Z > A
+                const getNumber = (str) => {
+                    const match = str.match(/-(\d+)$/); // lấy số sau dấu "-"
+                    return match ? parseInt(match[1], 10) : -1;
+                };
+
+                const numA = getNumber(a.displayName);
+                const numB = getNumber(b.displayName);
+
+                if (numA !== -1 && numB !== -1) {
+                    // Nếu cả hai đều có số → so sánh số (Z > A)
+                    return numB - numA;
+                }
+                // Nếu không có số → fallback về so sánh chuỗi (Z > A)
+                return b.displayName.localeCompare(a.displayName, 'vi');
             });
 
             sortedDisplayGroups.forEach(displayGroup => {
