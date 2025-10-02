@@ -1085,9 +1085,19 @@
 
             container.innerHTML = '';
 
-            // ← THÊM ĐOẠN NÀY: Sắp xếp displayGroups từ Z > A
+            // // ← THÊM ĐOẠN NÀY: Sắp xếp displayGroups từ Z > A
+            // const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
+            //     return b.displayName.localeCompare(a.displayName, 'vi'); // Z > A
+            // });
+
+            // Sắp xếp displayGroups Z > A chỉ theo số sau dấu "-"
             const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
-                return b.displayName.localeCompare(a.displayName, 'vi'); // Z > A
+            const getNum = (str) => {
+                const match = (str || '').match(/-(\d+)/);
+                return match ? parseInt(match[1], 10) : 0;
+            };
+
+            return getNum(b.displayName) - getNum(a.displayName);
             });
 
             sortedDisplayGroups.forEach(displayGroup => {
