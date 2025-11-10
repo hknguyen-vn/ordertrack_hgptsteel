@@ -31,15 +31,8 @@
       @page{ size: var(--page-w) var(--page-h); margin:0; }
       body *{ visibility:hidden }
       .print-container, .print-container *{ visibility:visible }
-      .print-container{
-          position: fixed;
-          top: 0;   /* đẩy lên thêm 2mm */
-          left: 0;
-          right: 0;
-          margin: 0;
-          padding: 0;
-          display: block;
-       }
+      .print-container{position: absolute; inset: 0; display: block;
+      }
 
       .label{
         width:var(--page-w); height:var(--page-h);
@@ -57,7 +50,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>HGPT STEEL — In tem trình mẫu CĐT</h1>
+    <h1>HGPT STEEL — In tem trình mẫu</h1>
     <div class="row">
       <button id="btnPrint">🖨️ In tem</button>
       <a href="https://docs.google.com/spreadsheets/d/1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0/edit?usp=sharing" class="link" target="_blank">🔗 Mở Sheet nền</a>
@@ -163,8 +156,8 @@
               <div class="stt">STT: ${STT || ''}</div>
               <div class="ten">${CHUNGLOAI.toUpperCase()}</div>
               <div class="meta">
-                <b>Vật liệu:</b> ${VATLIEU || ''} &nbsp;|&nbsp;
-                <b>Vị trí:</b> ${VITRI || ''}
+                <b>VL:</b> ${VATLIEU || ''} &nbsp;|&nbsp;
+                <b>VT:</b> ${VITRI || ''}
               </div>
             </div>`;
           frag.appendChild(page);
