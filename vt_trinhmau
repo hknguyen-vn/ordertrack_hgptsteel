@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HGPT Steel — In tem trình mẫu (70×35mm)</title>
+  <style>
+    :root {
+      --page-w: 70mm;
+      --page-h: 35mm;
+      --pad: 2mm;
+      --gap: 3mm;
+      --qr: 15mm;          /* kích thước QR size lon*/
+      --font: "Times New Roman", Times, serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f3f5f8; color: #0f172a; }
+    .wrap { max-width: 960px; margin: 24px auto; padding: 16px; background: #fff; border-radius: 14px; box-shadow: 0 8px 24px rgba(2,6,23,.08); }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+    button {
+      padding: 10px 18px; border-radius: 10px; border: 2px solid #ffad56; background: #fff; color: #ff7a00;
+      font-weight: 700; cursor: pointer;
+    }
+    button:hover { background: #ffad56; color: #fff; }
+    .status { font-size: 13px; color: #475569; margin-left: 8px; }
+    .note { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+    /* Khu in */
+    .print-container { display: none; }
+
+    @media print{
+  @page{ size: var(--page-w) var(--page-h); margin:0 }
+  body *{ visibility:hidden }
+  .print-container, .print-container *{ visibility:visible }
+  .print-container{ position:absolute; inset:0; display:block }
+
+  /* 2 cột: [QR cố định] | [Text giãn] */
+  .label{
+    width: var(--page-w); height: var(--page-h);
+    page-break-after: always;
+    margin:0; padding: var(--pad);
+    display:flex;
+    align-items:stretch;          /* stretch này mới căn giữa theo chiều dọc nè */
+    justify-content:flex-start;  /* bám trái */
+    gap: var(--gap);
+    background:#fff;
+  }
+
+  /* KHÓA bề ngang cột QR để text không rớt xuống dưới */
+  .qr{
+    flex: 0 0 var(--qr);         /* không co giãn, đúng = var(--qr) */
+    width: var(--qr);
+    height: var(--qr);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qr img{
+    display:block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Cột text chiếm phần còn lại, không tràn xuống dưới QR */
+  .text{
+    flex: 1 1 0;
+    min-width: 0;                /* tránh đẩy rớt dòng bất thường */
+    line-height: 1.06;
+  }
+  .ma  { font-family: var(--font); font-weight:700; font-size:14pt; }
+  .ten { font-family: var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
+}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>HGPT STEEL — In tem VT_QR</h1>
+    <div class="row">
+      <button id="btnPrint">🖨️ In tem VT_QR</button>
+      <span class="status" id="status">Sẵn sàng</span>
+    </div>
+    <div class="note">Tem 70×35mm, QR bên trái (từ cột <b>MAHANG</b>), bên phải: <b>MAHANG</b> và <b>TENMAU</b> (in hoa), nhân bản theo <b>SL</b>.</div>
+  </div>
+
+  <div class="print-container" id="printContainer"></div>
+
+  <script>
+    // Giữ nguyên AppSheet cấu hình của bạn
+    const appId    = '977c97bd-47e4-441c-b564-fe28574e9d74';
+    const accessKey= 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+    const region   = 'www'; // ví dụ: 'www', 'eu', ...
+
+    const $ = (sel)=>document.querySelector(sel);
+    const statusEl = $('#status');
+    const printContainer = $('#printContainer');
+
+    // Lấy dữ liệu VT_QR từ AppSheet
+    async function fetchVTQR() {
+      const url = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`;
+      const body = { Action: 'Find', Properties: {}, Selector: 'Filter(VT_QR, true' };
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'ApplicationAccessKey': accessKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const txt = await resp.text();
+      if (!resp.ok) throw new Error(`VT_QR HTTP ${resp.status} - ${txt.slice(0,200)}`);
+      const data = JSON.parse(txt);
+      if (!Array.isArray(data)) throw new Error('Dữ liệu trả về không phải mảng.');
+      return data;
+    }
+
+    // Lấy giá trị theo nhiều tên khóa (an toàn case/cách đặt cột)
+    function pick(obj, names) {
+      for (const n of names) {
+        if (obj[n] !== undefined && obj[n] !== null && obj[n] !== '') return obj[n];
+        const hit = Object.keys(obj).find(k => k.toLowerCase() === n.toLowerCase());
+        if (hit && obj[hit] !== '') return obj[hit];
+      }
+      return '';
+    }
+
+    // Tạo URL QR từ MAHANG
+    function qrURL(mahang, size=400) {
+      const v = (mahang || '').toString().trim();
+      return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(v)}`;
+    }
+
+    // Render tem & in
+    async function printVTQR_All() {
+      statusEl.textContent = 'Đang tải dữ liệu VT_QR...';
+      printContainer.innerHTML = '';
+
+      let rows;
+      try {
+        rows = await fetchVTQR();
+      } catch (e) {
+        statusEl.textContent = 'Lỗi tải VT_QR';
+        alert('Không đọc được dữ liệu VT_QR:\n' + e.message);
+        return;
+      }
+
+      if (!rows.length) {
+        statusEl.textContent = 'Không có dữ liệu VT_QR.';
+        alert('Không có dữ liệu hợp lệ trong VT_QR.');
+        return;
+      }
+
+      statusEl.textContent = 'Đang tạo tem...';
+      const frag = document.createDocumentFragment();
+      let total = 0;
+
+      for (const r of rows) {
+        const MAHANG = (pick(r, ['MAHANG','mahang','MÃ HÀNG']) || '').toString().trim();
+        const TENMAU = (pick(r, ['TENMAU','tenmau','Tên mẫu']) || '').toString().trim();
+        const SLraw  = pick(r, ['SL','sl','Số lượng']);
+        const SL = Number.parseInt(SLraw || 1, 10) > 0 ? Number.parseInt(SLraw,10) : 1;
+
+        if (!MAHANG) continue;
+
+        for (let i = 0; i < SL; i++) {
+          total++;
+          const page = document.createElement('div');
+          page.className = 'label';
+
+          page.innerHTML = `
+            <div class="qr"><img src="${qrURL(MAHANG)}" alt="QR"></div>
+            <div class="text">
+              <div class="ma">${MAHANG}</div>
+              <div class="ten">${(TENMAU || '').toUpperCase()}</div>
+            </div>
+          `;
+          frag.appendChild(page);
+        }
+      }
+
+      if (!total) {
+        statusEl.textContent = 'Không có bản ghi hợp lệ.';
+        alert('Có dữ liệu nhưng thiếu cột MAHANG/SL hợp lệ.');
+        return;
+      }
+
+      printContainer.appendChild(frag);
+
+      // Chờ ảnh QR nạp xong rồi mới in
+      const imgs = printContainer.querySelectorAll('img');
+      if (imgs.length) {
+        await Promise.all(
+          Array.from(imgs).map(img => new Promise(res => {
+            if (img.complete) res();
+            else { img.onload = res; img.onerror = res; }
+          }))
+        );
+      }
+
+      statusEl.textContent = `Đã tạo ${total} tem • mở hộp thoại in...`;
+      setTimeout(() => { window.print(); statusEl.textContent = 'Sẵn sàng'; }, 120);
+    }
+
+    // Event
+    document.getElementById('btnPrint').addEventListener('click', printVTQR_All);
+  </script>
+</body>
+</html>
