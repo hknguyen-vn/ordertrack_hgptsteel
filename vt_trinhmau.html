@@ -64,18 +64,21 @@
   <div class="print-container" id="printContainer"></div>
 
   <script>
-    // ====== CẤU HÌNH GOOGLE SHEET ======
-    const GOOGLE_SHEET_ID = '1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0';
-    const SHEET_NAME = 'Sheet1';
+  // ====== CẤU HÌNH ======
+  const GOOGLE_SHEET_ID = '1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0';
+  const SHEET_NAME = 'Sheet1';
 
-    // ====== TIỆN ÍCH ======
+  document.addEventListener('DOMContentLoaded', () => {
     const $ = (s)=>document.querySelector(s);
     const statusEl = $('#status');
     const printContainer = $('#printContainer');
     const sheetLink = $('#sheetLink');
+    const btnPrint = $('#btnPrint');
 
-    // Liên kết tới Sheet
-    sheetLink.href = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit#gid=0`;
+    // Gán link sheet (có guard để không ném lỗi)
+    if (sheetLink) {
+      sheetLink.href = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit#gid=0`;
+    }
 
     async function fetchSheetGViz(sheetId, sheetName){
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
@@ -93,12 +96,11 @@
       return rows;
     }
 
+    const norm = s => String(s||'').toLowerCase().replace(/\s+/g,'');
     function pick(obj, names){
-      const norm = (s)=> String(s||'').toLowerCase().replace(/\s+/g,'');
       const keys = Object.keys(obj);
       for (const want of names){
-        const target = norm(want);
-        const hitKey = keys.find(k => norm(k) === target);
+        const hitKey = keys.find(k => norm(k) === norm(want));
         if (hitKey !== undefined) return obj[hitKey];
       }
       return '';
@@ -123,7 +125,7 @@
         return;
       }
 
-      // 👉 Sắp xếp theo STT tăng dần
+      // sort theo STT
       rows.sort((a,b)=>{
         const A = Number(pick(a, ['STT','stt'])) || 0;
         const B = Number(pick(b, ['STT','stt'])) || 0;
@@ -172,7 +174,9 @@
       setTimeout(()=>{ window.print(); statusEl.textContent = 'Sẵn sàng'; }, 120);
     }
 
-    document.getElementById('btnPrint').addEventListener('click', printFromSheet);
-  </script>
+    // Gắn sự kiện sau khi DOM sẵn sàng
+    if (btnPrint) btnPrint.addEventListener('click', printFromSheet);
+  });
+</script>
 </body>
 </html>
