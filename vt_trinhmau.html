@@ -31,7 +31,15 @@
       @page{ size: var(--page-w) var(--page-h); margin:0; }
       body *{ visibility:hidden }
       .print-container, .print-container *{ visibility:visible }
-      .print-container{ position:absolute; inset:0; display:block }
+      .print-container{
+          position: fixed;
+          top: -2mm;   /* đẩy lên thêm 2mm */
+          left: 0;
+          right: 0;
+          margin: 0;
+          padding: 0;
+          display: block;
+       }
 
       .label{
         width:var(--page-w); height:var(--page-h);
