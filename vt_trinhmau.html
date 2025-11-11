@@ -28,34 +28,30 @@
     .print-container{ display:none; }
 
     @media print{
-      @page{ size: var(--page-w) var(--page-h); margin:0; }
-      body *{ visibility:hidden }
-      .print-container, .print-container *{ visibility:visible }
-      .print-container{position: absolute; inset: 0; display: block;
-      }
+  @page { size: 70mm 35mm; margin: 0; }
 
-      .label{
-        /* width:var(--page-w); height:var(--page-h); */
-        width:70mm; height:35mm;
-        /* page-break-after:always; */
-        margin:0;
-        /* padding:var(--pad); */
-        padding: 4mm var(--pad) var(--pad) var(--pad);  /* giảm đệm để sát mép trên, top right bottom left, chỉnh chỗ nào thì thay var(--pad) bằng ..mm */
-        display:flex;
-        /* ĐÂY LÀ ĐIỂM CHÍNH: bám lên top thay vì giữa */
-        align-items: flex-start;
-        /* align-items:center; */
-        justify-content:flex-start;
-        background:#fff;
-        break-inside: avoid;
-      }
-      .label + .label{ break-before: page; }   /* hoặc page-break-before: always; */
-      .text{ line-height:1.06; width:100%; }
-      .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#555; margin-bottom:1mm; }
-      .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
-      .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
-      .meta b{ font-weight:700; }
-    }
+  /* Ẩn toàn bộ UI khi in – dùng display:none để không chiếm chỗ */
+  .wrap{ display: none !important; }
+
+  /* Chỉ để vùng in xuất hiện */
+  .print-container{
+    display: block !important;
+    position: fixed;      /* bám đầu trang */
+    top: 0; left: 0; right: 0;
+    margin: 0; padding: 0;
+  }
+
+  .label{
+    width: 70mm; height: 35mm;
+    padding: 4mm var(--pad) var(--pad) var(--pad);  /* giảm đệm để sát mép trên, top right bottom left, chỉnh chỗ nào thì thay var(--pad) bằng ..mm */
+    display: flex;
+    align-items: flex-start; justify-content: flex-start;
+    break-inside: avoid;
+  }
+
+  /* Chỉ ngắt TRƯỚC tem kế tiếp, không ngắt sau tem cuối → không có trang trắng */
+  .label + .label{ break-before: page; }    /* hoặc: page-break-before: always; */
+}
   </style>
 </head>
 <body>
