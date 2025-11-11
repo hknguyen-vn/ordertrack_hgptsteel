@@ -31,12 +31,8 @@
       @page{ size: var(--page-w) var(--page-h); margin:0; }
       body *{ visibility:hidden }
       .print-container, .print-container *{ visibility:visible }
-      .print-container{
-    display: block !important;
-    position: fixed;      /* bám đầu trang */
-    top: 0; left: 0; right: 0;
-    margin: 0; padding: 0;
-  }
+      .print-container{position: absolute; inset: 0; display: block;
+      }
 
       .label{
         /* width:var(--page-w); height:var(--page-h); */
