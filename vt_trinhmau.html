@@ -36,22 +36,20 @@
 
       .label{
         /* width:var(--page-w); height:var(--page-h); */
-        width: 70mm;
-        height: 35mm;
-        page-break-after: always;
-        page-break-before: avoid;
-        page-break-inside: avoid;
+        width:70mm; height:35mm;
+        /* page-break-after:always; */
         margin:0;
         /* padding:var(--pad); */
         padding: 4mm var(--pad) var(--pad) var(--pad);  /* giảm đệm để sát mép trên, top right bottom left, chỉnh chỗ nào thì thay var(--pad) bằng ..mm */
-        box-sizing: border-box;
         display:flex;
         /* ĐÂY LÀ ĐIỂM CHÍNH: bám lên top thay vì giữa */
         align-items: flex-start;
         /* align-items:center; */
         justify-content:flex-start;
         background:#fff;
+        break-inside: avoid;
       }
+      .label + .label{ break-before: page; }   /* hoặc page-break-before: always; */
       .text{ line-height:1.06; width:100%; }
       .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#555; margin-bottom:1mm; }
       .ten{ font-family:var(--font); font-weight:500; font-size:12.5pt; text-transform:uppercase; }
