@@ -16,7 +16,7 @@
     *{ box-sizing: border-box; }
     body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f3f5f8; color:#0f172a; }
     .wrap{ max-width:960px; margin:24px auto; padding:16px; background:#fff; border-radius:14px; box-shadow:0 8px 24px rgba(2,6,23,.08); }
-    h1{ font-size:20px; margin:0 0 12px; }
+    h1{ font-size:20px; margin:0 0 12px; padding-bottom: 12px; }
     .row{ display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
     button, a.link{
       padding:10px 18px; border-radius:10px; border:2px solid #ffad56; background:#fff; color:#ff7a00;
@@ -52,7 +52,7 @@
         break-inside: avoid;
       }
       .label + .label{ break-before: page; }   /* hoặc page-break-before: always; */
-      .text{ line-height:1.06; width:100%; padding: auto;}
+      .text{ line-height:1.06; width:100%;}
       .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#000000; margin-bottom:1mm; }
       .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
       .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
