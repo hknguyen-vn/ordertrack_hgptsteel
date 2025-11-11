@@ -37,7 +37,9 @@
       .label{
         width:var(--page-w);
         height:var(--page-h);
-        page-break-after:always;
+        /* page-break-after:always; */
+        page-break-inside: avoid;
+        break-inside: avoid;
         margin:0;
         /* padding:var(--pad); */
         padding: 4mm var(--pad) var(--pad) var(--pad);  /* giảm đệm để sát mép trên, top right bottom left, chỉnh chỗ nào thì thay var(--pad) bằng ..mm */
