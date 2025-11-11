@@ -29,8 +29,8 @@
 
     @media print{
       @page{ size: var(--page-w) var(--page-h); margin:0; }
-      .wrap{ display: none !important; }
-      body *{ visibility:hidden }
+      .wrap{ display: none !important; }   /* Mấu chốt Ẩn toàn bộ UI khi in – dùng display:none để không chiếm chỗ */
+      /* body *{ visibility:hidden } */ 
       .print-container, .print-container *{ visibility:visible }
       .print-container{position: absolute; inset: 0; display: block;
       }
