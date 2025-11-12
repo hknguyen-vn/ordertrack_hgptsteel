@@ -30,62 +30,65 @@
     .print-container{ display:none; }
 
     @media print{
-      @page{ size: var(--sheet-w) var(--sheet-h); margin:0; }
+  @page{ size: var(--sheet-w) var(--sheet-h); margin:0; }
 
-      .wrap{ display:none !important; }
-      .print-container{ display:block; position:absolute; inset:0; padding:0; }
+  .wrap{ display:none !important; }
+  .print-container{ display:block; position:absolute; inset:0; padding:0; }
 
-      /* 1 trang = 3 tem (35×70) đặt ngang trên khổ 70×105 */
-      .sheet{
-        width: var(--sheet-w);
-        height: var(--sheet-h);
-        display:grid;
-        grid-template-columns: repeat(3, var(--label-w));
-        grid-auto-rows: var(--label-h);
-        gap: 0;
-        background:#fff;
-        position: relative;
-        break-inside: avoid;
-        page-break-after: always;
-      }
+  .sheet{
+    width: var(--sheet-w);
+    height: var(--sheet-h);
+    display:grid;
+    grid-template-columns: repeat(3, var(--label-w));
+    grid-auto-rows: var(--label-h);
+    gap: 0;
+    background:#fff;
+    position: relative;
+    break-inside: avoid;
+    page-break-after: always;
+  }
+  .sheet::before,.sheet::after{
+    content:""; position:absolute; top:0; bottom:0; width:0;
+    border-left:1px dashed #999; pointer-events:none;
+  }
+  .sheet::before{ left: var(--label-w); }
+  .sheet::after{  left: calc(var(--label-w) * 2); }
 
-      /* Vạch cắt đứt giữa 3 tem */
-      .sheet::before, .sheet::after{
-        content:""; position:absolute; top:0; bottom:0; width:0;
-        border-left:1px dashed #999;
-        pointer-events:none;
-      }
-      .sheet::before{ left: var(--label-w); }
-      .sheet::after{  left: calc(var(--label-w) * 2); }
+  /* Khung tem */
+  .label{
+    width: var(--label-w);
+    height: var(--label-h);
+    position: relative;
+    background:#fff;
+    overflow: hidden;          /* có thể bật/tắt nếu cần quan sát */
+  }
 
-      /* Khung tem (không xoay) */
-      .label{
-        width: var(--label-w);
-        height: var(--label-h);
-        position: relative;
-        background:#fff;
-        overflow: hidden;        /* đề phòng tràn khi xoay */
-      }
+  /* NỘI DUNG XOAY – đã thêm translate để không bị trôi ra ngoài */
+  .rotor{
+    position:absolute; top:0; left:0;
 
-      /* Phần NỘI DUNG xoay 90 độ để chữ nằm ngang theo phôi */
-      .rotor{
-        position:absolute; top:0; left:0;
-        width: 70mm;       /* sau xoay: chiều dài nội dung */
-        height: 35mm;      /* sau xoay: chiều cao nội dung */
-        transform: rotate(90deg);       /* xoay ngang */
-        transform-origin: top left;     /* chốt gốc để khớp kích thước */
-        padding: var(--pad) var(--pad) var(--pad) calc(var(--pad) + 1mm);
-        display:flex; align-items:flex-start; justify-content:flex-start;
-      }
+    /* kích thước trước khi xoay (ngang x dọc) */
+    width:  var(--label-h);   /* 70mm */
+    height: var(--label-w);   /* 35mm */
 
-      /* Kiểu chữ */
-      .text{ line-height:1.06; width:100%; }
-      .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#000; margin-bottom:1mm; }
-      .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
-      .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
-      .meta b{ font-weight:700; }
-    }
-  </style>
+    transform-origin: top left;
+
+    /* QUAN TRỌNG: dịch xuống đúng chiều cao tem sau khi xoay */
+    /* thứ tự transform đọc từ phải sang trái:
+       rotate(-90deg) chạy trước, rồi mới translateY(...) */
+    transform: translateY(var(--label-h)) rotate(-90deg);
+
+    padding: var(--pad) var(--pad) var(--pad) calc(var(--pad) + 1mm);
+    display:flex; align-items:flex-start; justify-content:flex-start;
+  }
+
+  .text{ line-height:1.06; width:100%; }
+  .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#000; margin-bottom:1mm; }
+  .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
+  .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
+  .meta b{ font-weight:700; }
+}
+
 </head>
 <body>
   <div class="wrap">
