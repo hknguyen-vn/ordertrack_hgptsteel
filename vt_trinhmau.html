@@ -159,9 +159,13 @@
         const VATLIEU   = String(pick(r, ['VATLIEU','Vật liệu','vatlieu'])||'').trim();
         const VITRI     = String(pick(r, ['VITRI','Vị trí','vitri'])||'').trim();
         const SLraw     = pick(r, ['SOLUONG','Soluong','SL','soluong']);
-        const SL        = Number.parseInt(SLraw,10) > 0 ? Number.parseInt(SLraw,10) : 0;
+        const SL        = Number.parseInt(SLraw,10);
 
-        if (!CHUNGLOAI || SL === 0) continue;
+      // 👉 Bỏ qua hàng nếu Soluong trống, không phải số, hoặc = 0
+      if (!SLraw || isNaN(SL) || SL <= 0) continue;
+
+      // 👉 Cũng bỏ qua nếu CHUNGLOAI rỗng (tuỳ bạn giữ hay bỏ)
+      if (!CHUNGLOAI) continue;
 
         for (let i=0; i<SL; i++){
           total++;
