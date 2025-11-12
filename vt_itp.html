@@ -76,7 +76,7 @@
     /* QUAN TRỌNG: dịch xuống đúng chiều cao tem sau khi xoay */
     /* thứ tự transform đọc từ phải sang trái:
        rotate(-90deg) chạy trước, rồi mới translateY(...) */
-    transform: translate(var(--label-w), var(--label-h)) rotate(180deg);
+    transform: translateY(var(--label-h)) rotate(-180deg);
 
     padding: var(--pad) var(--pad) var(--pad) calc(var(--pad) + 1mm);
     display:flex; align-items:flex-start; justify-content:flex-start;
