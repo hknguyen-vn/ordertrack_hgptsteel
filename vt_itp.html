@@ -64,23 +64,19 @@
 
   /* NỘI DUNG XOAY – đã thêm translate để không bị trôi ra ngoài */
   .rotor{
-    position:absolute; top:0; left:0;
-
-    /* kích thước trước khi xoay (ngang x dọc) */
-    width:  var(--label-h);   /* 70mm */
-    height: var(--label-w);   /* 35mm */
-
-    transform-origin: top left;
-
-    /* QUAN TRỌNG: dịch xuống đúng chiều cao tem sau khi xoay */
-    /* thứ tự transform đọc từ phải sang trái:
-       rotate(-90deg) chạy trước, rồi mới translateY(...) */
-    transform: rotate(180deg);
-    transform-origin: center;
-
-
-    padding: var(--pad) var(--pad) var(--pad) calc(var(--pad) + 1mm);
-    display:flex; align-items:flex-start; justify-content:flex-start;
+    ransform: rotate(90deg);
+                transform-origin: center center;
+                position: absolute;
+                width: 70mm;
+                /* Đảo chiều rộng cao sau khi xoay */
+                height: 35mm;
+                left: -17.5mm;
+                /* Điều chỉnh vị trí để căn giữa */
+                top: 17.5mm;
+                display: flex;
+                flex-direction: column;
+                padding: 8mm 2mm 2mm 2mm;
+                box-sizing: border-box;
   }
 
   .text{ line-height:1.06; width:100%; }
