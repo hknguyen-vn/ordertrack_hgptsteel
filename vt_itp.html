@@ -51,7 +51,7 @@
     border-left:1px dashed #999; pointer-events:none;
   }
   .sheet::before{ left: var(--label-w); }
-  .sheet::after{  left: calc(var(--label-w) * 2 + 0.5mm); }
+  .sheet::after{  left: calc(var(--label-w) * 2); }
 
   /* Khung tem */
   .label{
@@ -60,8 +60,6 @@
     position: relative;
     background:#fff;
     overflow: hidden;          /* có thể bật/tắt nếu cần quan sát */
-    padding: var(--pad) var(--pad) var(--pad) 10mm;  /* giảm đệm để sát mép trên, top right bottom left, chỉnh chỗ nào thì thay var(--pad) bằng ..mm */
-    display:flex;
   }
 
   /* NỘI DUNG XOAY – đã thêm translate để không bị trôi ra ngoài */
