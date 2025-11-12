@@ -76,7 +76,7 @@
     /* QUAN TRỌNG: dịch xuống đúng chiều cao tem sau khi xoay */
     /* thứ tự transform đọc từ phải sang trái:
        rotate(-90deg) chạy trước, rồi mới translateY(...) */
-    transform: translateY(var(--label-h)) rotate(-180deg);
+    transform: translateY(var(--label-h)) rotate(-90deg);
 
     padding: var(--pad) var(--pad) var(--pad) calc(var(--pad) + 1mm);
     display:flex; align-items:flex-start; justify-content:flex-start;
@@ -88,6 +88,35 @@
   .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
   .meta b{ font-weight:700; }
 }
+
+  /* Khung tem */
+.label{
+  width: var(--label-w);
+  height: var(--label-h);
+  position: relative;
+  background:#fff;
+  overflow: hidden;
+}
+
+/* Nội dung xoay 180 độ */
+.rotor{
+  position:absolute; top:0; left:0;
+  width: var(--label-w);
+  height: var(--label-h);
+  transform-origin: center center; /* xoay quanh tâm tem */
+  transform: rotate(180deg);       /* xoay 180 độ */
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding: var(--pad);
+}
+
+.text{ line-height:1.06; width:100%; }
+.stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#000; margin-bottom:1mm; }
+.ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
+.meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
+.meta b{ font-weight:700; }
+
 </style>
 </head>
 <body>
