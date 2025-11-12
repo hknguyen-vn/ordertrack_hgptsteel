@@ -3,20 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HGPT - Tem trình mẫu Dự án (70×35mm)</title>
+  <title>HGPT - Tem trình mẫu Dự án (70×105mm • 3 tem/trang)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root{
-      --page-w: 70mm;
-      --page-h: 35mm;
-      --pad: 2mm;
-      --gap: 2mm;
+      /* KÍCH THƯỚC TRANG IN & TEM */
+      --sheet-w: 105mm;    /* 3 tem x 35mm */
+      --sheet-h: 70mm;     /* cao 70mm */
+      --label-w: 35mm;
+      --label-h: 70mm;
+      --gap: 2mm;          /* khoảng cách giữa tem (hiển thị) */
+      --pad: 3mm;
       --font: "Times New Roman", Times, serif;
     }
+
     *{ box-sizing: border-box; }
-    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f3f5f8; color:#0f172a; }
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#f3f5f8; color:#0f172a;
+    }
     .wrap{ max-width:960px; margin:24px auto; padding:16px; background:#fff; border-radius:14px; box-shadow:0 8px 24px rgba(2,6,23,.08); }
-    h1{ font-size:28px; margin:0 0 12px; padding: 12px 0 0 0; color:rgb(129, 95, 8) }
+    h1{ font-size:28px; margin:0 0 12px; padding:12px 0 0 0; color:rgb(129,95,8) }
     .row{ display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
     button, a.link{
       padding:10px 18px; border-radius:10px; border:2px solid #ffad56; background:#fff; color:#ff7a00;
@@ -26,87 +33,57 @@
     .status{ font-size:16px; color:#475569; margin-left:8px; }
     .note{ font-size:14px; color:#64748b; margin-top:4px; }
 
+    /* VÙNG IN */
     .print-container{ display:none; }
-    /* === PRINT: 3 tem ngang (105×70mm) === */
-  @media print{
-  *{-webkit-print-color-adjust:exact !important; color-adjust:exact !important;}
 
-  /* Ẩn UI, chỉ để vùng in */
-  .container{ display:none !important; }
-  #dataContainer{ display:none !important; visibility:hidden !important; height:0 !important; overflow:hidden !important; }
+    @media print{
+      @page{ size: var(--sheet-w) var(--sheet-h); margin:0; }
 
-  /* Khổ giấy đúng 105×70mm, không margin */
-  @page{ size: 105mm 70mm; margin:0; }
+      .wrap{ display:none !important; }
+      .print-container{ display:block; position:absolute; inset:0; padding:0; }
 
-  body{ margin:0 !important; padding:0 !important; background:#fff !important; }
-  body *{ visibility:hidden; }
-  .print-container, .print-container *{ visibility:visible; }
+      /* Mỗi TRANG IN (SHEET) chứa 3 TEM */
+      .sheet{
+        width: var(--sheet-w);
+        height: var(--sheet-h);
+        display:grid;
+        grid-template-columns: repeat(3, var(--label-w));
+        grid-auto-rows: var(--label-h);
+        justify-content:start;
+        align-content:start;
+        gap: 0;                   /* không chừa rãnh thực tế để tránh sai kích thước */
+        background:#fff;
+        position: relative;
+        break-inside: avoid;
+        page-break-after: always; /* mỗi .sheet là 1 trang in */
+      }
 
-  .print-container{
-    position:fixed; top:0; left:0; right:0;
-    width:100% !important; height:100% !important;
-    display:block !important; margin:0 !important; padding:0 !important;
-  }
+      /* Đường cắt/dấu gạch giữa 3 tem (chỉ hiển thị, không tăng kích thước) */
+      .sheet::before,
+      .sheet::after{
+        content:"";
+        position:absolute; top:0; bottom:0; width:0;
+        border-left: 1px dashed #999;
+        pointer-events:none;
+      }
+      .sheet::before{ left: var(--label-w); }         /* vạch tại 35mm */
+      .sheet::after{  left: calc(var(--label-w) * 2); }/* vạch tại 70mm */
 
-  /* Trang in 105x70mm - 3 tem ngang */
-  .label-page-horizontal{
-    width:105mm; height:70mm;
-    margin:0; padding:0; box-sizing:border-box;
-    display:flex; flex-direction:row; background:#fff; font-family:Arial, sans-serif;
-
-    /* phân trang: chỉ ngắt trước trang kế tiếp, không tạo trang trắng cuối */
-    page-break-inside:avoid;
-    break-inside:avoid;
-    page-break-after:always;
-  }
-  .label-page-horizontal:last-child{
-    page-break-after:auto;
-  }
-
-  /* Mỗi tem 35x70mm (3 tem = 105mm) */
-  .label-item-horizontal{
-    width:35mm; height:70mm; position:relative; overflow:hidden;
-    border-right:1px dashed #ccc;
-  }
-  .label-item-horizontal:last-child{ border-right:none; }
-
-  /* Bố cục trong tem: xoay trái 90° để nội dung nằm ngang theo chiều tem */
-  .label-item-horizontal .label-wrapper{
-    position:absolute;
-    transform:rotate(90deg);
-    transform-origin:center center;
-
-    /* sau xoay, kích thước nội dung là 70×35mm */
-    width:70mm; height:35mm;
-
-    /* căn giữa wrapper vào khung tem 35×70mm */
-    left:-17.5mm;  /* = -(70-35)/2  */
-    top:17.5mm;    /* =  (70-35)/2  */
-
-    display:flex; flex-direction:column;
-    padding:8mm 2mm 2mm 2mm; box-sizing:border-box;
-  }
-
-  /* Header (tên KH) */
-  .label-item-horizontal .label-header{
-    width:80%; font-size:12px; font-weight:bold; line-height:1.2;
-    color:#000; margin-bottom:2mm; word-wrap:break-word; overflow-wrap:break-word;
-  }
-
-  /* Nội dung */
-  .label-item-horizontal .label-content{ display:flex; flex-direction:row; gap:1mm; align-items:stretch; flex:1; }
-
-  .label-item-horizontal .label-info{ flex:1; display:flex; flex-direction:column; gap:1mm; }
-  .label-item-horizontal .label-info .ten_sp{ font-size:10px; color:#000; line-height:1.1; }
-  .label-item-horizontal .label-info .component-name{ font-size:12px; font-weight:bold; color:#000; line-height:1.3; margin-top:0; }
-  .label-item-horizontal .label-info .additional-info{ font-size:11px; color:#000; font-weight:bold; line-height:1.2; margin-top:1mm; }
-
-  .label-item-horizontal .qr-container{ width:17mm; margin-right:2mm; display:flex; flex-direction:column; gap:1mm; }
-  .label-item-horizontal .qr-container img{
-    width:10mm !important; height:10mm !important; max-width:10mm !important; max-height:10mm !important;
-  }
-  .label-item-horizontal .qr-code-id{ font-size:12px; color:#000; line-height:1; text-align:center; }
-}
+      .label{
+        width: var(--label-w);
+        height: var(--label-h);
+        padding: 4mm var(--pad) var(--pad) var(--pad); /* ép nội dung lên trên một chút */
+        display:flex;
+        align-items:flex-start;
+        justify-content:flex-start;
+        background:#fff;
+      }
+      .text{ line-height:1.06; width:100%; }
+      .stt{ font-family:var(--font); font-size:10pt; font-weight:700; color:#000; margin-bottom:1mm; }
+      .ten{ font-family:var(--font); font-weight:700; font-size:12pt; text-transform:uppercase; }
+      .meta{ font-family:var(--font); font-size:10.5pt; margin-top:1mm; }
+      .meta b{ font-weight:700; }
+    }
   </style>
 </head>
 <body>
@@ -115,16 +92,16 @@
     <h1>Tem mẫu vật tư Dự án</h1>
     <div class="row">
       <button id="btnPrint">🖨️ IN TEM</button>
-      <a href="https://docs.google.com/spreadsheets/d/1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0/edit?usp=sharing" class="link" target="_blank">🔗 Mở link Sheet nền</a>
+      <a id="sheetLink" href="#" class="link" target="_blank">🔗 Mở link Sheet nền</a>
       <span class="status" id="status">
-    <i class="fa-solid fa-check fa-xl" style="color: #004ffa;"></i>
-    Sẵn sàng in rồi :)  !
-</span>
+        <i class="fa-solid fa-check fa-xl" style="color:#004ffa;"></i>
+        Sẵn sàng in rồi :)
+      </span>
     </div>
     <div class="note">
-      Nguồn dữ liệu: Google Sheet tại <b>"Sheet1"</b> gồm các cột:<br>------<br><b>1. STT</b>,<br><b>2. CHUNGLOAI-QUYCACH</b>,<br> <b>3. VATLIEU</b>,<br> <b>4. VITRI</b>,<br> <b>5. SOLUONG</b>.<br>
-      -------<br>
-      <b>**In theo thứ tự ở cột STT**</b>
+      Nguồn dữ liệu: Google Sheet tại <b>"Sheet1"</b> gồm các cột:<br>------<br>
+      <b>1. STT</b>,<br><b>2. CHUNGLOAI-QUYCACH</b>,<br> <b>3. VATLIEU</b>,<br> <b>4. VITRI</b>,<br> <b>5. SOLUONG</b>.<br>
+      -------<br><b>**In theo thứ tự ở cột STT**</b>
     </div>
   </div>
 
@@ -133,22 +110,21 @@
   <script>
   // ====== CẤU HÌNH ======
   const GOOGLE_SHEET_ID = '1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0';
-  const SHEET_NAME = 'Sheet1';
+  const SHEET_NAME      = 'Sheet1';
 
   document.addEventListener('DOMContentLoaded', () => {
     const $ = (s)=>document.querySelector(s);
-    const statusEl = $('#status');
+    const statusEl       = $('#status');
     const printContainer = $('#printContainer');
-    const sheetLink = $('#sheetLink');
-    const btnPrint = $('#btnPrint');
+    const sheetLink      = $('#sheetLink');
+    const btnPrint       = $('#btnPrint');
 
-    // Gán link sheet (có guard để không ném lỗi)
     if (sheetLink) {
       sheetLink.href = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit#gid=0`;
     }
 
     async function fetchSheetGViz(sheetId, sheetName){
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+      const url  = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
       const resp = await fetch(url);
       const text = await resp.text();
       const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
@@ -171,6 +147,22 @@
         if (hitKey !== undefined) return obj[hitKey];
       }
       return '';
+    }
+
+    // Tạo 1 node tem (label)
+    function makeLabel({STT, CHUNGLOAI, VATLIEU, VITRI}){
+      const div = document.createElement('div');
+      div.className = 'label';
+      div.innerHTML = `
+        <div class="text">
+          <div class="stt">STT: ${STT || ''}</div>
+          <div class="ten">${(CHUNGLOAI||'').toString().toUpperCase()}</div>
+          <div class="meta">
+            <b>VL:</b> ${VATLIEU || ''} &nbsp;|&nbsp;
+            <b>VT:</b> ${VITRI || ''}
+          </div>
+        </div>`;
+      return div;
     }
 
     async function printFromSheet(){
@@ -200,37 +192,36 @@
       });
 
       statusEl.textContent = 'Đang tạo tem...';
-      const frag = document.createDocumentFragment();
-      let total = 0;
+
+      // Gom 3 tem / 1 sheet (trang)
+      let sheet    = null;
+      let cellInPg = 0;
+      let total    = 0;
 
       for (const r of rows){
-        const STT = pick(r, ['STT','stt']);
-        const CHUNGLOAI = String(pick(r, ['CHUNGLOAI','Chủng loại','chungloai'])||'').trim();
+        const STT       = pick(r, ['STT','stt']);
+        const CHUNGLOAI = String(pick(r, ['CHUNGLOAI','CHUNGLOAI-QUYCACH','Chủng loại','chungloai'])||'').trim();
         const VATLIEU   = String(pick(r, ['VATLIEU','Vật liệu','vatlieu'])||'').trim();
         const VITRI     = String(pick(r, ['VITRI','Vị trí','vitri'])||'').trim();
         const SLraw     = pick(r, ['SOLUONG','Soluong','SL','soluong']);
         const SL        = Number.parseInt(SLraw,10);
 
-      // 👉 Bỏ qua hàng nếu Soluong trống, không phải số, hoặc = 0
-      if (!SLraw || isNaN(SL) || SL <= 0) continue;
-
-      // 👉 Cũng bỏ qua nếu CHUNGLOAI rỗng (tuỳ bạn giữ hay bỏ)
-      if (!CHUNGLOAI) continue;
+        if (!SLraw || isNaN(SL) || SL <= 0) continue;
+        if (!CHUNGLOAI) continue;
 
         for (let i=0; i<SL; i++){
+          // tạo sheet mới nếu hết trang hoặc chưa có
+          if (!sheet || cellInPg === 3){
+            sheet = document.createElement('div');
+            sheet.className = 'sheet';
+            printContainer.appendChild(sheet);
+            cellInPg = 0;
+          }
+          sheet.appendChild(
+            makeLabel({STT, CHUNGLOAI, VATLIEU, VITRI})
+          );
+          cellInPg++;
           total++;
-          const page = document.createElement('div');
-          page.className = 'label';
-          page.innerHTML = `
-            <div class="text">
-              <div class="stt">STT: ${STT || ''}</div>
-              <div class="ten">${CHUNGLOAI.toUpperCase()}</div>
-              <div class="meta">
-                <b>VL:</b> ${VATLIEU || ''} &nbsp;|&nbsp;
-                <b>VT:</b> ${VITRI || ''}
-              </div>
-            </div>`;
-          frag.appendChild(page);
         }
       }
 
@@ -240,14 +231,12 @@
         return;
       }
 
-      printContainer.appendChild(frag);
       statusEl.textContent = `Đã tạo ${total} tem • mở hộp thoại in...`;
       setTimeout(()=>{ window.print(); statusEl.textContent = 'Sẵn sàng'; }, 120);
     }
 
-    // Gắn sự kiện sau khi DOM sẵn sàng
     if (btnPrint) btnPrint.addEventListener('click', printFromSheet);
   });
-</script>
+  </script>
 </body>
 </html>
