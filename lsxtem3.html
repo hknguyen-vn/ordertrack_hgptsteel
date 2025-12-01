@@ -881,118 +881,119 @@
     </div>
 
     <script>
-    // Constants
-    const appId = '977c97bd-47e4-441c-b564-fe28574e9d74';
-    const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-DFCgG-v97aL';
-    const region = 'www';
+        // Constants
+        const appId = '977c97bd-47e4-441c-b564-fe28574e9d74';
+        const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+        const region = 'www';
 
-    let allData = [];
-    let filteredData = [];
-    let groupedData = {};
+        let allData = [];
+        let filteredData = [];
+        let groupedData = {};
 
-    let isShiftPressed = false;
-    let lastClickedCheckbox = null;
-    let isDragging = false;
-    let dragStartCheckbox = null;
-    let autoScrollTimer = null;
+        let isShiftPressed = false;
+        let lastClickedCheckbox = null;
+        let isDragging = false;
+        let dragStartCheckbox = null;
+        let autoScrollTimer = null;
 
-    function generateQRCodeAPI(text, size = 300) {
-        if (!text || text.trim() === '') text = 'NO-DATA';
-        return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&charset-source=UTF-8&charset-target=UTF-8`;
-    }
+        function generateQRCodeAPI(text, size = 300) {
+            if (!text || text.trim() === '') text = 'NO-DATA';
+            return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&charset-source=UTF-8&charset-target=UTF-8`;
+        }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => { clearTimeout(timeout); func(...args); };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
-    async function fetchLSXData() {
-        const res = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/LSX/Action`, {
-            method: 'POST',
-            headers: {
-                'ApplicationAccessKey': accessKey,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                Action: 'Find',
-                Properties: {},
-                Selector: "Filter(LSX, true)"
-            })
-        });
+        async function fetchLSXData() {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/LSX/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(LSX, true)"
+                    })
+                });
 
-        if (!res.ok) throw new Error("Lỗi tải dữ liệu máy chủ");
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error("Sai định dạng dữ liệu từ AppSheet");
-
-        return data;
-    }
-
-    function groupDataHierarchically(data) {
-        const grouped = {};
-        data.forEach(item => {
-            const orderId = item.don_hang_id || 'Không có đơn hàng';
-            const displayGroup = item.hien_thi || 'Không có nhóm hiển thị';
-
-            if (!grouped[orderId]) {
-                grouped[orderId] = {
-                    orderId,
-                    customerName: item.ten_kh || '',
-                    loai_lenh: item.loai_lenh || '',
-                    displayGroups: {},
-                    totalWeight: 0,
-                    totalComponents: 0,
-                    totalDisplayGroups: 0
-                };
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('Invalid data format received');
+                return data;
+            } catch (error) {
+                console.error('Failed to fetch LSX data:', error);
+                throw error;
             }
+        }
 
-            if (!grouped[orderId].displayGroups[displayGroup]) {
-                grouped[orderId].displayGroups[displayGroup] = {
-                    displayName: displayGroup,
-                    components: [],
-                    totalWeight: 0,
-                    componentCount: 0
-                };
-                grouped[orderId].totalDisplayGroups++;
-            }
+        function groupDataHierarchically(data) {
+            const grouped = {};
 
-            grouped[orderId].displayGroups[displayGroup].components.push(item);
+            data.forEach(item => {
+                const orderId = item.don_hang_id || 'Không có đơn hàng';
+                const displayGroup = item.hien_thi || 'Không có nhóm hiển thị';
 
-            if (item.cau_kien && item.cau_kien.trim() !== '') {
-                grouped[orderId].displayGroups[displayGroup].componentCount++;
-                grouped[orderId].totalComponents++;
-            }
+                if (!grouped[orderId]) {
+                    grouped[orderId] = {
+                        orderId: orderId,
+                        customerName: item.ten_kh || '',
+                        loai_lenh: item.loai_lenh || '',
+                        displayGroups: {},
+                        totalWeight: 0,
+                        totalComponents: 0,
+                        totalDisplayGroups: 0
+                    };
+                }
 
-            const weight = parseFloat(item.khoi_luong) || 0;
-            grouped[orderId].displayGroups[displayGroup].totalWeight += weight;
-            grouped[orderId].totalWeight += weight;
-        });
-        return grouped;
-    }
+                if (!grouped[orderId].displayGroups[displayGroup]) {
+                    grouped[orderId].displayGroups[displayGroup] = {
+                        displayName: displayGroup,
+                        components: [],
+                        totalWeight: 0,
+                        componentCount: 0
+                    };
+                    grouped[orderId].totalDisplayGroups += 1;
+                }
 
-    function formatNumber(value) {
-        if (value === null || value === undefined || value === '') return '0';
-        const num = parseFloat(value);
-        if (isNaN(num)) return '0';
-        return num.toLocaleString('vi-VN');
-    }
+                grouped[orderId].displayGroups[displayGroup].components.push(item);
 
-    // ==========================
-    // HIỂN THỊ COMPONENT
-    // ==========================
-    function createComponentCardHTML(component, idx, orderId, displayGroupName) {
-        const safeId = `ck_${orderId}_${displayGroupName}_${idx}`;
+                if (item.cau_kien && item.cau_kien.trim() !== '') {
+                    grouped[orderId].displayGroups[displayGroup].componentCount += 1;
+                    grouped[orderId].totalComponents += 1;
+                }
 
-        return `
+                const weight = parseFloat(item.khoi_luong) || 0;
+                grouped[orderId].displayGroups[displayGroup].totalWeight += weight;
+                grouped[orderId].totalWeight += weight;
+            });
+
+            return grouped;
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') return '0';
+            const num = parseFloat(value);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('vi-VN');
+        }
+
+        // CHÚ THÍCH: Hàm tạo HTML cho component card trong danh sách
+        // Đây là nơi hiển thị thông tin component trên giao diện chính
+        function createComponentCardHTML(component, idx, orderId, displayGroupName) {
+            const safeId = `ck_${orderId}_${displayGroupName}_${idx}`;
+            return `
         <div class="component-card component-row">
-            <input type="checkbox" class="component-checkbox" id="${safeId}"
-                data-order-id="${orderId}" 
-                data-group-name="${displayGroupName}" 
-                data-idx="${idx}"
-                checked
+            <input type="checkbox" class="component-checkbox" id="${safeId}" 
+                data-order-id="${orderId}" data-group-name="${displayGroupName}" data-idx="${idx}" checked
                 onchange="handleCheckboxChange(this)"
                 onmousedown="handleMouseDown(this, event)"
                 onmouseenter="handleMouseEnter(this, event)">
@@ -1003,13 +1004,8 @@
             
             <div class="component-column quantity-col">
                 <span>SL:</span>
-                <input 
-                    type="number" 
-                    min="0" 
-                    value="${component.sl_san_xuat || 1}" 
-                    class="sl-input" 
-                    data-idx="${idx}"
-                    oninput="handleQuantityChange(this)" />
+                <input type="number" min="1" value="${component.sl_san_xuat || 1}" 
+                    class="sl-input" data-idx="${idx}" />
             </div>
             
             <div class="component-column weight-col">
@@ -1028,372 +1024,707 @@
                 <span>QR: ${component.cau_kien_qr || ''}</span>
             </div>
         </div>
-        `;
-    }
-
-    function generateSafeId(text) {
-        return text.replace(/[^a-zA-Z0-9]/g, '_');
-    }
-
-    function renderHierarchicalData(data) {
-        const container = document.getElementById('dataContainer');
-        container.innerHTML = '';
-
-        if (Object.keys(data).length === 0) {
-            container.innerHTML = `<div style="padding:40px;text-align:center;color:#777">Không có dữ liệu</div>`;
-            return;
+    `;
         }
 
-        Object.values(data).forEach(order => {
-            const safeOrderId = generateSafeId(order.orderId);
-
-            const orderElement = document.createElement('div');
-            orderElement.className = 'order-item';
-            orderElement.id = `order-${safeOrderId}`;
-
-            orderElement.innerHTML = `
-                <div class="order-header" onclick="toggleOrderExpansion('${safeOrderId}')">
-                    <div class="order-info">
-                        <div class="order-title">
-                            <span>📋</span>
-                            <span>${order.orderId} - ${order.loai_lenh}</span>
-                        </div>
-                        <div class="order-summary">
-                            ${order.customerName} • 
-                            ${order.totalDisplayGroups} hạng mục •
-                            ${order.totalComponents} cấu kiện •
-                            ${formatNumber(order.totalWeight)} kg
-                        </div>
-                    </div>
-
-                    <div class="order-actions">
-                        <button class="print-btn" onclick="printOrderLabelsHorizontal('${order.orderId}', event)">
-                            🖨️ In Tem 3
-                        </button>
-                        <span class="expand-icon">▼</span>
-                    </div>
-                </div>
-
-                <div class="order-content">
-                    <div class="display-groups-container" data-order-id="${order.orderId}">
-                    </div>
-                </div>
-            `;
-
-            container.appendChild(orderElement);
-        });
-    }
-
-    function loadDisplayGroups(orderId) {
-        const order = groupedData[orderId];
-        if (!order) return;
-
-        const container = document.querySelector(`[data-order-id="${orderId}"]`);
-        container.innerHTML = '';
-
-        const sortedGroups = Object.values(order.displayGroups);
-
-        sortedGroups.forEach(displayGroup => {
-            const displayElement = document.createElement('div');
-            displayElement.className = 'display-group';
-
-            displayElement.innerHTML = `
-                <div class="display-group-header" onclick="toggleDisplayGroupExpansion('${orderId}', '${displayGroup.displayName}')">
-                    <label onclick="event.stopPropagation();toggleSelectAllInGroup('${orderId}','${displayGroup.displayName}',this)">
-                        <input type="checkbox">
-                    </label>
-
-                    <div class="display-group-info">
-                        <div class="display-group-title">
-                            📁 ${displayGroup.displayName}
-                        </div>
-                        <div class="display-group-summary">
-                            ${displayGroup.componentCount} cấu kiện • 
-                            ${formatNumber(displayGroup.totalWeight)} kg
-                        </div>
-                    </div>
-
-                    <div class="order-actions">
-                        <button class="print-btn-nhom"
-                            onclick="printCheckedComponentsHorizontal('${orderId}', '${displayGroup.displayName}', event)">
-                            🖨️ In Tem 3
-                        </button>
-                        <span class="expand-icon">▼</span>
-                    </div>
-                </div>
-
-                <div class="display-group-content">
-                    <div class="components-container" data-display-group="${orderId}|||${displayGroup.displayName}">
-                    </div>
-                </div>
-            `;
-
-            container.appendChild(displayElement);
-        });
-    }
-
-    function loadComponents(orderId, displayGroupName) {
-        const order = groupedData[orderId];
-        if (!order) return;
-
-        const group = order.displayGroups[displayGroupName];
-        if (!group) return;
-
-        const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
-        container.innerHTML = '';
-
-        group.components.forEach((component, idx) => {
-            const div = document.createElement('div');
-            div.innerHTML = createComponentCardHTML(component, idx, orderId, displayGroupName);
-            container.appendChild(div.firstElementChild);
-        });
-
-        updateSelectedWeightSummary();  // cập nhật tổng ngay khi mở nhóm
-    }
-
-    function toggleOrderExpansion(safeId) {
-        const orderEl = document.getElementById(`order-${safeId}`);
-        if (!orderEl) return;
-
-        if (orderEl.classList.contains('expanded')) {
-            orderEl.classList.remove('expanded');
-        } else {
-            orderEl.classList.add('expanded');
-
-            const originId = Object.keys(groupedData).find(id => generateSafeId(id) === safeId);
-            loadDisplayGroups(originId);
+        function generateSafeId(text) {
+            return text.replace(/[^a-zA-Z0-9]/g, '_');
         }
-    }
 
-    function toggleDisplayGroupExpansion(orderId, groupName) {
-        const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
-        const wrapper = container.closest('.display-group');
-
-        if (wrapper.classList.contains('expanded')) {
-            wrapper.classList.remove('expanded');
+        function renderHierarchicalData(data) {
+            const container = document.getElementById('dataContainer');
             container.innerHTML = '';
-        } else {
-            wrapper.classList.add('expanded');
-            loadComponents(orderId, groupName);
-        }
-    }
 
-    // ==============================
-    // HÀM TÍNH TỔNG KL ĐÃ CHỌN
-    // ==============================
-    function updateSelectedWeightSummary() {
-        let totalSelected = 0;
+            if (Object.keys(data).length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">Không có dữ liệu để hiển thị</div>';
+                return;
+            }
 
-        const rows = document.querySelectorAll('.component-row');
-        rows.forEach(row => {
-            const checkbox = row.querySelector('.component-checkbox');
-            if (!checkbox || !checkbox.checked) return;
+            Object.values(data).forEach(order => {
+                const safeOrderId = generateSafeId(order.orderId);
+                const orderElement = document.createElement('div');
+                orderElement.className = 'order-item';
+                orderElement.id = `order-${safeOrderId}`;
 
-            const weightSpan = row.querySelector('.weight-col span');
-            if (!weightSpan) return;
+                const displayGroupCount = Object.keys(order.displayGroups).length;
+                orderElement.innerHTML = `
+                    <div class="order-header" onclick="toggleOrderExpansion('${safeOrderId}')">
+                        <div class="order-info">
+                            <div class="order-title">
+                                <span>📋</span>
+                                <span>${order.orderId} - ${order.loai_lenh} </span>
+                            </div>
+                            <div class="order-summary">
+                                ${order.customerName} • ${displayGroupCount} hạng mục • 
+                            ${order.totalComponents} loại cấu kiện • ${formatNumber(order.totalWeight)} kg
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="print-btn" onclick="printOrderLabelsHorizontal('${order.orderId}', event)">
+                                🖨️ In Tem 3
+                            </button>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="order-content">
+                        <div class="display-groups-container" data-order-id="${order.orderId}">
+                        </div>
+                    </div>
+                `;
 
-            let text = weightSpan.textContent.replace(/kg/i, '').trim();
-            const weightPerItem = parseFloat(text.replace(/\./g, '').replace(',', '.')) || 0;
-
-            const qtyInput = row.querySelector('.sl-input');
-            let qty = qtyInput ? parseInt(qtyInput.value) : 1;
-            if (isNaN(qty) || qty < 0) qty = 0;
-
-            totalSelected += weightPerItem * qty;
-        });
-
-        const el = document.getElementById('selectedWeight');
-        if (el) el.textContent = formatNumber(totalSelected) + ' kg';
-    }
-
-    function handleQuantityChange(input) {
-        let v = parseInt(input.value);
-        if (isNaN(v) || v < 0) v = 0;
-        input.value = v;
-        updateSelectedWeightSummary();
-    }
-
-    // ==============================
-    // TICK / SHIFT / DRAG SELECT
-    // ==============================
-    function handleCheckboxChange(checkbox) {
-        if (isShiftPressed && lastClickedCheckbox) {
-            handleRangeSelection(checkbox);
-        } else {
-            lastClickedCheckbox = checkbox;
-        }
-        updateSelectedWeightSummary();
-    }
-
-    function toggleSelectAllInGroup(orderId, groupName, label) {
-        const isChecked = label.querySelector("input").checked;
-        const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
-        if (!container) return;
-
-        container.querySelectorAll(".component-checkbox").forEach(cb => cb.checked = isChecked);
-
-        updateSelectedWeightSummary();
-    }
-
-    function handleRangeSelection(currentCheckbox) {
-        const container = currentCheckbox.closest('.components-container');
-        if (!container) return;
-
-        const all = Array.from(container.querySelectorAll('.component-checkbox'));
-        const start = all.indexOf(lastClickedCheckbox);
-        const end = all.indexOf(currentCheckbox);
-
-        if (start >= 0 && end >= 0) {
-            const min = Math.min(start, end);
-            const max = Math.max(start, end);
-            for (let i = min; i <= max; i++) all[i].checked = currentCheckbox.checked;
+                container.appendChild(orderElement);
+            });
         }
 
-        updateSelectedWeightSummary();
-    }
+        function loadDisplayGroups(orderId) {
+            const order = groupedData[orderId];
+            if (!order) return;
 
-    function handleMouseDown(checkbox, event) {
-        if (isShiftPressed) {
-            event.preventDefault();
-            isDragging = true;
-            dragStartCheckbox = checkbox;
+            const container = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (!container) return;
 
-            const container = checkbox.closest('.components-container');
-            const boxes = Array.from(container.querySelectorAll('.component-checkbox'));
-            window.dragOriginalStates = boxes.map(cb => cb.checked);
+            container.innerHTML = '';
 
-            checkbox.checked = true;
-        } else {
-            lastClickedCheckbox = checkbox;
-        }
-    }
+            // // ← THÊM ĐOẠN NÀY: Sắp xếp displayGroups từ Z > A
+            // const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
+            //     return b.displayName.localeCompare(a.displayName, 'vi'); // Z > A
+            // });
 
-    function handleMouseEnter(checkbox, event) {
-        if (!isDragging || !isShiftPressed) return;
+            // Sắp xếp displayGroups Z > A chỉ theo số sau dấu "-"
+            const sortedDisplayGroups = Object.values(order.displayGroups).sort((a, b) => {
+            const getNum = (str) => {
+                const match = (str || '').match(/-(\d+)/);
+                return match ? parseInt(match[1], 10) : 0;
+            };
 
-        const container = checkbox.closest('.components-container');
-        const all = Array.from(container.querySelectorAll('.component-checkbox'));
+            return getNum(b.displayName) - getNum(a.displayName);
+            });
 
-        const start = all.indexOf(dragStartCheckbox);
-        const end = all.indexOf(checkbox);
-        if (start < 0 || end < 0) return;
+            sortedDisplayGroups.forEach(displayGroup => {
+                const safeDisplayName = generateSafeId(displayGroup.displayName);
+                const safeOrderId = generateSafeId(orderId);
 
-        all.forEach((cb, idx) => cb.checked = window.dragOriginalStates[idx]);
+                const displayElement = document.createElement('div');
+                displayElement.className = 'display-group';
 
-        const min = Math.min(start, end);
-        const max = Math.max(start, end);
-        for (let i = min; i <= max; i++) all[i].checked = true;
+                displayElement.innerHTML = `
+            <div class="display-group-header" onclick="toggleDisplayGroupExpansion('${orderId}', '${displayGroup.displayName}')">
+                <label onclick="event.stopPropagation();toggleSelectAllInGroup('${orderId}','${displayGroup.displayName}',this)">
+                    <input type="checkbox" style="width: 7mm; height: 6mm;" data-order-id="${orderId}" data-group-name="${displayGroup.displayName}">
+                </label>
+                <div class="display-group-info">
+                    <div class="display-group-title">
+                        <span>📁</span>
+                        <span>${displayGroup.displayName}</span>
+                    </div>
+                    <div class="display-group-summary">
+                        ${displayGroup.componentCount} loại cấu kiện • ${formatNumber(displayGroup.totalWeight)} kg
+                    </div>
+                </div>
+                <div class="order-actions">
+                    <button class="print-btn-nhom" onclick="printCheckedComponentsHorizontal('${orderId}', '${displayGroup.displayName}', event)" style="background: #1976d2; color: #fff; font-size: 12px; padding: 8px 15px;">
+                        🖨️ In Tem 3
+                    </button>
+                    <span class="expand-icon">▼</span>
+                </div>
+            </div>
+            <div class="display-group-content">
+                <div class="components-container" data-display-group="${orderId}|||${displayGroup.displayName}">
+                </div>
+            </div>
+        `;
 
-        updateSelectedWeightSummary();
-    }
-
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-        dragStartCheckbox = null;
-        window.dragOriginalStates = null;
-    });
-
-    document.addEventListener("keydown", e => {
-        if (e.key === "Shift") isShiftPressed = true;
-    });
-
-    document.addEventListener("keyup", e => {
-        if (e.key === "Shift") {
-            isShiftPressed = false;
-            isDragging = false;
-        }
-    });
-
-    // ==============================
-    // SUMMARY
-    // ==============================
-    function updateSummary(data) {
-        let totalOrders = Object.keys(data).length;
-        let totalGroups = 0;
-        let totalComponents = 0;
-        let totalWeight = 0;
-
-        Object.values(data).forEach(order => {
-            totalGroups += order.totalDisplayGroups;
-            totalComponents += order.totalComponents;
-            totalWeight += order.totalWeight;
-        });
-
-        document.getElementById('totalOrders').textContent = formatNumber(totalOrders);
-        document.getElementById('totalDisplayGroups').textContent = formatNumber(totalGroups);
-        document.getElementById('totalComponents').textContent = formatNumber(totalComponents);
-        document.getElementById('totalWeight').textContent = formatNumber(totalWeight) + ' kg';
-
-        document.getElementById('summaryBar').style.display = 'flex';
-    }
-
-    const debouncedFilter = debounce(term => {
-        if (!term.trim()) {
-            filteredData = allData;
-        } else {
-            const t = term.toLowerCase();
-            filteredData = allData.filter(item =>
-                (item.don_hang_id && item.don_hang_id.toLowerCase().includes(t)) ||
-                (item.ten_kh && item.ten_kh.toLowerCase().includes(t)) ||
-                (item.ten_sp && item.ten_sp.toLowerCase().includes(t)) ||
-                (item.cau_kien && item.cau_kien.toLowerCase().includes(t)) ||
-                (item.hien_thi && item.hien_thi.toLowerCase().includes(t))
-            );
+                container.appendChild(displayElement);
+            });
         }
 
-        groupedData = groupDataHierarchically(filteredData);
-        renderHierarchicalData(groupedData);
-        updateSummary(groupedData);
-    }, 300);
+        function loadComponents(orderId, displayGroupName) {
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
 
-    // ==============================
-    // KHỞI TẠO
-    // ==============================
-    async function initialize() {
-        try {
-            let data = await fetchLSXData();
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
 
-            data = data.filter(item =>
-                item.khoi_luong_dv &&
-                item.cau_kien_qr &&
-                item.khoi_luong_dv !== "#DIV/0!" &&
-                item.cau_kien_qr !== "#DIV/0!"
-            );
+            container.innerHTML = '';
 
-            allData = data;
-            filteredData = data;
+            order.displayGroups[displayGroupName].components.forEach((component, idx) => {
+                const componentDiv = document.createElement('div');
+                componentDiv.innerHTML = createComponentCardHTML(component, idx, orderId, displayGroupName);
+                container.appendChild(componentDiv.firstElementChild);
+            });
+        }
+
+        function toggleOrderExpansion(safeOrderId) {
+            const orderElement = document.getElementById(`order-${safeOrderId}`);
+
+            if (orderElement.classList.contains('expanded')) {
+                orderElement.classList.remove('expanded');
+            } else {
+                orderElement.classList.add('expanded');
+                const originalOrderId = Object.keys(groupedData).find(id => generateSafeId(id) === safeOrderId);
+                if (originalOrderId) {
+                    loadDisplayGroups(originalOrderId);
+                }
+            }
+        }
+
+        function toggleDisplayGroupExpansion(orderId, displayGroupName) {
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            const displayGroupElement = container.closest('.display-group');
+
+            if (displayGroupElement.classList.contains('expanded')) {
+                displayGroupElement.classList.remove('expanded');
+                container.innerHTML = '';
+            } else {
+                displayGroupElement.classList.add('expanded');
+                loadComponents(orderId, displayGroupName);
+            }
+        }
+
+        // ===== PRINT FUNCTIONS - TEM NGANG 3 TEM/TRANG XOAY -90 ĐỘ =====
+        // CHÚ THÍCH: Đây là hàm in tem cho toàn bộ đơn hàng
+        async function printOrderLabelsHorizontal(orderId, event) {
+            event.stopPropagation();
+            const group = groupedData[orderId];
+            if (!group) return;
+
+            document.getElementById('loadingOverlay').classList.add('show');
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+
+            try {
+                let labelCount = 0;
+                const fragment = document.createDocumentFragment();
+
+                // Collect all items from all display groups
+                const allItems = [];
+                Object.values(group.displayGroups).forEach(displayGroup => {
+                    allItems.push(...displayGroup.components);
+                });
+
+                // Filter items with valid cau_kien
+                const validItems = allItems.filter(item => item.cau_kien && item.cau_kien.trim() !== '');
+
+                // Group items into pages of 3
+                for (let i = 0; i < validItems.length; i += 3) {
+                    const pageItems = validItems.slice(i, i + 3);
+                    const labelPage = document.createElement('div');
+                    labelPage.className = 'label-page-horizontal';
+
+                    // Create 3 slots, fill with data or leave empty
+                    for (let j = 0; j < 3; j++) {
+                        const item = pageItems[j];
+                        const labelItem = document.createElement('div');
+                        labelItem.className = 'label-item-horizontal';
+
+                        if (item) {
+                            // CHÚ THÍCH: Tạo QR code - sử dụng item.cau_kien_qr
+                            let qrHTML = '';
+                            if (item.cau_kien_qr && item.cau_kien_qr.trim() !== '') {
+                                const qrURL = generateQRCodeAPI(item.cau_kien_qr, 600);
+                                qrHTML = `<img src="${qrURL}" alt="QR Code" onerror="this.style.display='none'">`;
+                            } else {
+                                qrHTML = `<div style="width: 10mm; height: 10mm; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">NO QR</div>`;
+                            }
+
+                            // CHÚ THÍCH: Đây là template HTML cho mỗi tem in
+                            // Để thêm thông tin mới, sửa đổi cấu trúc HTML dưới đây
+                            labelItem.innerHTML = `
+                                <div class="label-wrapper">
+                                    <div class="label-header">${item.ten_kh || ''}</div>
+                                    <div class="label-content">
+                                        <div class="label-info">
+                                            <div class="ten_sp">${item.ten_sp || ''}</div>
+                                            <div class="component-name">${item.cau_kien || ''}</div>
+                                            <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY -->
+                                            <!-- Ví dụ thêm khối lượng:
+                                            <div class="additional-info">${item.khoi_luong || ''} kg</div>
+                                            -->
+                                            <!-- Ví dụ thêm số lượng:
+                                            <div class="additional-info">SL: ${item.sl_san_xuat || 1}</div>
+                                            -->
+                                            
+                                            <div class="additional-info">${item.quy_cach || ''}</div>
+                                            
+                                        </div>
+                                        <div class="qr-container">
+                                            ${qrHTML}
+                                            <div class="qr-code-id">${item.don_hang_ct_id || ''}</div>
+                                            <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI DƯỚI QR CODE -->
+                                            <!-- Ví dụ:
+                                            <div class="qr-additional-info">${item.new_field || ''}</div>
+                                            -->
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // Empty slot - tem trống khi không đủ 3 tem trong trang
+                            labelItem.innerHTML = `
+                                <div class="label-wrapper">
+                                    <div class="label-header"></div>
+                                    <div class="label-content">
+                                        <div class="label-info">
+                                            <div class="ten_sp"></div>
+                                            <div class="component-name"></div>
+                                        </div>
+                                        <div class="qr-container">
+                                            <div style="width: 10mm; height: 10mm;"></div>
+                                            <div class="qr-code-id"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        labelPage.appendChild(labelItem);
+                    }
+
+                    fragment.appendChild(labelPage);
+                    labelCount += pageItems.length;
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                printContainer.appendChild(fragment);
+                document.getElementById('loadingOverlay').classList.remove('show');
+
+                if (labelCount > 0) {
+                    setTimeout(() => { window.print(); }, 500);
+                } else {
+                    alert('Không có cấu kiện nào để in trong đơn hàng này.');
+                }
+
+            } catch (error) {
+                console.error('Error creating labels:', error);
+                document.getElementById('loadingOverlay').classList.remove('show');
+                alert('Có lỗi xảy ra khi tạo tem. Vui lòng thử lại.');
+            }
+        }
+
+        function toggleSelectAllInGroup(orderId, displayGroupName, label) {
+            const groupCheckbox = label.querySelector('input[type="checkbox"]');
+            const checked = groupCheckbox.checked;
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
+            const checkboxes = container.querySelectorAll('.component-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        // CHÚ THÍCH: Hàm in tem cho các cấu kiện đã chọn trong một nhóm
+        async function printCheckedComponentsHorizontal(orderId, displayGroupName, event) {
+            event.stopPropagation();
+            const order = groupedData[orderId];
+            if (!order || !order.displayGroups[displayGroupName]) return;
+
+            const displayGroup = order.displayGroups[displayGroupName];
+            const container = document.querySelector(`[data-display-group="${orderId}|||${displayGroupName}"]`);
+            if (!container) return;
+
+            const checkboxes = container.querySelectorAll('.component-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Vui lòng chọn ít nhất 1 cấu kiện để in!');
+                return;
+            }
+
+            // CHÚ THÍCH: Lấy danh sách cấu kiện đã chọn và số lượng cần in cho từng cấu kiện
+            let selectedItems = [];
+            checkboxes.forEach(cb => {
+                const idx = parseInt(cb.getAttribute('data-idx'));
+                const component = displayGroup.components[idx];
+                // Lấy số lượng từ input
+                const input = container.querySelector(`input.sl-input[data-idx="${idx}"]`);
+                let soLuong = parseInt(component.sl_san_xuat) || 1;
+                if (input && !isNaN(parseInt(input.value))) {
+                    soLuong = parseInt(input.value);
+                }
+                // Đưa vào mảng đúng số lượng
+                for (let i = 0; i < soLuong; i++) {
+                    selectedItems.push(component);
+                }
+            });
+
+            document.getElementById('loadingOverlay').classList.add('show');
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+
+            try {
+                let labelCount = 0;
+                const fragment = document.createDocumentFragment();
+
+                // Group selected items into pages of 3
+                for (let i = 0; i < selectedItems.length; i += 3) {
+                    const pageItems = selectedItems.slice(i, i + 3);
+                    const labelPage = document.createElement('div');
+                    labelPage.className = 'label-page-horizontal';
+
+                    // Create 3 slots, fill with data or leave empty
+                    for (let j = 0; j < 3; j++) {
+                        const item = pageItems[j];
+                        const labelItem = document.createElement('div');
+                        labelItem.className = 'label-item-horizontal';
+
+                        if (item) {
+                            // CHÚ THÍCH: Tạo QR code cho từng tem được chọn
+                            let qrHTML = '';
+                            if (item.cau_kien_qr && item.cau_kien_qr.trim() !== '') {
+                                const qrURL = generateQRCodeAPI(item.cau_kien_qr, 600);
+                                qrHTML = `<img src="${qrURL}" alt="QR Code" onerror="this.style.display='none'">`;
+                            } else {
+                                qrHTML = `<div style="width: 10mm; height: 10mm; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">NO QR</div>`;
+                            }
+
+                            // CHÚ THÍCH: Template HTML giống như hàm printOrderLabelsHorizontal
+                            // Để thêm thông tin mới, sửa đổi tương tự như hàm trên
+                            labelItem.innerHTML = `
+                        <div class="label-wrapper">
+                            <div class="label-header">${item.ten_kh || ''}</div>
+                            <div class="label-content">
+                                <div class="label-info">
+                                    <div class="ten_sp">${item.ten_sp || ''}</div>
+                                    <div class="component-name">${item.cau_kien || ''}</div>
+                                    <div class="additional-info">${item.quy_cach || ''}</div>
+                                    <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI VÀO ĐÂY (tương tự như hàm trên) -->
+                                </div>
+                                <div class="qr-container">
+                                    ${qrHTML}
+                                    <div class="qr-code-id">${item.don_hang_ct_id || ''}</div>
+                                    <!-- CHÚ THÍCH: THÊM THÔNG TIN MỚI DƯỚI QR CODE -->
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        } else {
+                            // Empty slot
+                            labelItem.innerHTML = `
+                        <div class="label-wrapper">
+                            <div class="label-header"></div>
+                            <div class="label-content">
+                                <div class="label-info">
+                                    <div class="ten_sp"></div>
+                                    <div class="component-name"></div>
+                                </div>
+                                <div class="qr-container">
+                                    <div style="width: 10mm; height: 10mm;"></div>
+                                    <div class="qr-code-id"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        }
+
+                        labelPage.appendChild(labelItem);
+                    }
+
+                    fragment.appendChild(labelPage);
+                    labelCount += pageItems.length;
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                printContainer.appendChild(fragment);
+                document.getElementById('loadingOverlay').classList.remove('show');
+
+                if (labelCount > 0) {
+                    // Đợi tất cả ảnh QR code trong printContainer load xong rồi mới in
+                    const imgs = printContainer.querySelectorAll('img');
+                    if (imgs.length > 0) {
+                        Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
+                            if (img.complete) resolve();
+                            else {
+                                img.onload = resolve;
+                                img.onerror = resolve;
+                            }
+                        }))).then(() => {
+                            setTimeout(() => { window.print(); }, 100);
+                        });
+                    } else {
+                        setTimeout(() => { window.print(); }, 100);
+                    }
+                } else {
+                    alert('Không có cấu kiện nào để in.');
+                }
+
+            } catch (error) {
+                console.error('Error creating labels:', error);
+                document.getElementById('loadingOverlay').classList.remove('show');
+                alert('Có lỗi xảy ra khi tạo tem. Vui lòng thử lại.');
+            }
+        }
+
+        // AUTO-SCROLL AND SELECTION FUNCTIONS
+        function handleAutoScroll(e) {
+            const threshold = 50;
+            const scrollSpeed = 5;
+            const scrollContainer = document.querySelector('.data-container');
+
+            if (!scrollContainer || !isDragging) return;
+
+            const rect = scrollContainer.getBoundingClientRect();
+            const mouseY = e.clientY;
+
+            if (mouseY < rect.top + threshold) {
+                if (autoScrollTimer) clearInterval(autoScrollTimer);
+                autoScrollTimer = setInterval(() => {
+                    scrollContainer.scrollTop -= scrollSpeed;
+                }, 16);
+            } else if (mouseY > rect.bottom - threshold) {
+                if (autoScrollTimer) clearInterval(autoScrollTimer);
+                autoScrollTimer = setInterval(() => {
+                    scrollContainer.scrollTop += scrollSpeed;
+                }, 16);
+            } else {
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        }
+
+        function handleRangeSelection(currentCheckbox) {
+            if (!lastClickedCheckbox || !isShiftPressed) return;
+
+            const orderId = currentCheckbox.getAttribute('data-order-id');
+            const groupName = currentCheckbox.getAttribute('data-group-name');
+            const lastOrderId = lastClickedCheckbox.getAttribute('data-order-id');
+            const lastGroupName = lastClickedCheckbox.getAttribute('data-group-name');
+
+            if (orderId !== lastOrderId || groupName !== lastGroupName) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+            if (!container) return;
+
+            const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+            const startIndex = allCheckboxes.indexOf(lastClickedCheckbox);
+            const endIndex = allCheckboxes.indexOf(currentCheckbox);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const minIndex = Math.min(startIndex, endIndex);
+                const maxIndex = Math.max(startIndex, endIndex);
+                const targetState = currentCheckbox.checked;
+
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    allCheckboxes[i].checked = targetState;
+                }
+            }
+        }
+
+        function handleDragSelection(currentCheckbox) {
+            if (!isDragging || !dragStartCheckbox) return;
+
+            const orderId = currentCheckbox.getAttribute('data-order-id');
+            const groupName = currentCheckbox.getAttribute('data-group-name');
+            const dragOrderId = dragStartCheckbox.getAttribute('data-order-id');
+            const dragGroupName = dragStartCheckbox.getAttribute('data-group-name');
+
+            if (orderId !== dragOrderId || groupName !== dragGroupName) return;
+
+            const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+            if (!container) return;
+
+            const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+            const startIndex = allCheckboxes.indexOf(dragStartCheckbox);
+            const endIndex = allCheckboxes.indexOf(currentCheckbox);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const minIndex = Math.min(startIndex, endIndex);
+                const maxIndex = Math.max(startIndex, endIndex);
+
+                if (window.dragOriginalStates) {
+                    allCheckboxes.forEach((cb, idx) => {
+                        cb.checked = window.dragOriginalStates[idx];
+                    });
+                }
+
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    allCheckboxes[i].checked = true;
+                }
+            }
+        }
+
+        function handleCheckboxChange(checkbox) {
+            if (isShiftPressed && lastClickedCheckbox) {
+                handleRangeSelection(checkbox);
+            } else {
+                lastClickedCheckbox = checkbox;
+            }
+        }
+
+        function handleMouseDown(checkbox, event) {
+            if (isShiftPressed) {
+                event.preventDefault();
+                isDragging = true;
+                dragStartCheckbox = checkbox;
+
+                const orderId = checkbox.getAttribute('data-order-id');
+                const groupName = checkbox.getAttribute('data-group-name');
+                const container = document.querySelector(`[data-display-group="${orderId}|||${groupName}"]`);
+                if (container) {
+                    const allCheckboxes = Array.from(container.querySelectorAll('.component-checkbox'));
+                    window.dragOriginalStates = allCheckboxes.map(cb => cb.checked);
+                }
+
+                checkbox.checked = true;
+            } else {
+                lastClickedCheckbox = checkbox;
+            }
+        }
+
+        function handleMouseEnter(checkbox, event) {
+            if (isShiftPressed && isDragging) {
+                handleDragSelection(checkbox);
+                handleAutoScroll(event);
+            }
+        }
+
+        function updateSummary(data) {
+            const totalOrders = Object.keys(data).length;
+            let totalDisplayGroups = 0;
+            let totalComponents = 0;
+            let totalWeight = 0;
+
+            Object.values(data).forEach(order => {
+                totalDisplayGroups += order.totalDisplayGroups;
+                totalComponents += order.totalComponents;
+                totalWeight += order.totalWeight;
+            });
+
+            document.getElementById('totalOrders').textContent = formatNumber(totalOrders);
+            document.getElementById('totalDisplayGroups').textContent = formatNumber(totalDisplayGroups);
+            document.getElementById('totalComponents').textContent = formatNumber(totalComponents);
+            document.getElementById('totalWeight').textContent = formatNumber(totalWeight) + ' kg';
+            document.getElementById('summaryBar').style.display = 'flex';
+        }
+
+        const debouncedFilter = debounce((searchTerm) => {
+            if (!searchTerm.trim()) {
+                filteredData = allData;
+            } else {
+                const term = searchTerm.toLowerCase();
+                // CHÚ THÍCH: Để thêm field mới vào tìm kiếm, thêm vào điều kiện filter dưới đây
+                filteredData = allData.filter(item =>
+                    (item.don_hang_id && item.don_hang_id.toLowerCase().includes(term)) ||
+                    (item.ten_kh && item.ten_kh.toLowerCase().includes(term)) ||
+                    (item.ten_sp && item.ten_sp.toLowerCase().includes(term)) ||
+                    (item.cau_kien && item.cau_kien.toLowerCase().includes(term)) ||
+                    (item.hien_thi && item.hien_thi.toLowerCase().includes(term))
+                    // || (item.new_field && item.new_field.toLowerCase().includes(term))  // Thêm field mới
+                );
+            }
 
             groupedData = groupDataHierarchically(filteredData);
             renderHierarchicalData(groupedData);
             updateSummary(groupedData);
+        }, 300);
 
+        function showError(message) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorDiv').style.display = 'block';
+        }
+
+        function showData() {
             document.getElementById('loadingDiv').style.display = 'none';
             document.getElementById('dataContainer').style.display = 'block';
-
-        } catch (e) {
-            console.error(e);
-            document.getElementById('loadingDiv').style.display = 'none';
-            document.getElementById('errorDiv').style.display = 'block';
-            document.getElementById('errorMessage').textContent = e.message;
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('searchInput').addEventListener('input', function () {
-            debouncedFilter(this.value);
+        // CHÚ THÍCH: Hàm khởi tạo - tải dữ liệu từ API
+        async function initialize() {
+            try {
+                let data = await fetchLSXData();
+                // CHÚ THÍCH: Lọc dữ liệu - loại bỏ các dòng có lỗi
+                data = data.filter(item =>
+                    item.khoi_luong_dv &&
+                    item.cau_kien_qr &&
+                    // item.quy_cach &&
+                    item.khoi_luong_dv !== "#DIV/0!" &&
+                    item.cau_kien_qr !== "#DIV/0!"
+                    // && item.new_field !== "#DIV/0!"  // Thêm filter cho field mới nếu cần
+                );
+                allData = data;
+                filteredData = data;
+                groupedData = groupDataHierarchically(filteredData);
+
+                renderHierarchicalData(groupedData);
+                updateSummary(groupedData);
+                showData();
+            } catch (error) {
+                showError(`Không thể tải dữ liệu: ${error.message}`);
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('mousemove', function (e) {
+            if (isShiftPressed && isDragging) {
+                handleAutoScroll(e);
+            }
         });
-        initialize();
-    });
 
-    // Export Global
-    window.handleCheckboxChange = handleCheckboxChange;
-    window.handleMouseDown = handleMouseDown;
-    window.handleMouseEnter = handleMouseEnter;
-    window.toggleSelectAllInGroup = toggleSelectAllInGroup;
-    window.updateSelectedWeightSummary = updateSelectedWeightSummary;
-    window.handleQuantityChange = handleQuantityChange;
-</script>
+        document.addEventListener('mouseup', function (e) {
+            if (isShiftPressed && isDragging) {
+                isDragging = false;
+                dragStartCheckbox = null;
+                window.dragOriginalStates = null;
 
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Shift') {
+                isShiftPressed = true;
+                document.body.style.cursor = 'crosshair';
+                document.body.classList.add('shift-mode');
+            }
+        });
+
+        document.addEventListener('keyup', function (e) {
+            if (e.key === 'Shift') {
+                isShiftPressed = false;
+                document.body.style.cursor = '';
+                document.body.classList.remove('shift-mode');
+                isDragging = false;
+                dragStartCheckbox = null;
+                window.dragOriginalStates = null;
+
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+        });
+
+        document.addEventListener('mouseleave', function (e) {
+            if (autoScrollTimer) {
+                clearInterval(autoScrollTimer);
+                autoScrollTimer = null;
+            }
+        });
+
+        // Make functions global
+        window.toggleOrderExpansion = toggleOrderExpansion;
+        window.toggleDisplayGroupExpansion = toggleDisplayGroupExpansion;
+        window.printOrderLabelsHorizontal = printOrderLabelsHorizontal;
+        window.printCheckedComponentsHorizontal = printCheckedComponentsHorizontal;
+        window.toggleSelectAllInGroup = toggleSelectAllInGroup;
+        window.handleCheckboxChange = handleCheckboxChange;
+        window.handleMouseDown = handleMouseDown;
+        window.handleMouseEnter = handleMouseEnter;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function () {
+                debouncedFilter(this.value);
+            });
+
+            initialize();
+        });
+    </script>
 </body>
 
 </html>
