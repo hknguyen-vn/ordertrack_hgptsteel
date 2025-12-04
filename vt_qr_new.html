@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HGPT Steel — Tem VT_QR (70×35mm • 3 tem/trang • xoay ngang)</title>
+  <style>
+    :root{
+      /* 1 trang: ngang 105mm, cao 70mm = 3 tem dọc 35×70mm */
+      --sheet-w: 105mm;    /* 3 tem x 35mm */
+      --sheet-h: 70mm;     /* cao 70mm */
+      --label-w: 35mm;
+      --label-h: 70mm;
+
+      /* Bên trong mỗi label (sau khi xoay) là vùng 70×35mm như mẫu VT_QR cũ */
+      --pad: 2mm;
+      --qr: 15mm;
+      --font: "Times New Roman", Times, serif;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#f3f5f8;
+      color:#0f172a;
+    }
+    .wrap{
+      max-width:960px;
+      margin:24px auto;
+      padding:16px;
+      background:#fff;
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(2,6,23,.08);
+    }
+    h1{ font-size:20px; margin:0 0 12px; }
+    .row{ display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+    button{
+      padding:10px 18px;
+      border-radius:10px;
+      border:2px solid #ffad56;
+      background:#fff;
+      color:#ff7a00;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:hover{ background:#ffad56; color:#fff; }
+    .status{ font-size:13px; color:#475569; margin-left:8px; }
+    .note{ font-size:12px; color:#64748b; margin-top:4px; }
+
+    .print-container{ display:none; }
+
+    /* ================== CHẾ ĐỘ IN ================== */
+    @media print{
+      @page{
+        size: var(--sheet-w) var(--sheet-h);
+        margin:0;
+      }
+
+      .wrap{ display:none !important; }
+      body{
+        background:#fff;
+      }
+
+      .print-container{
+        display:block;
+        position:absolute;
+        inset:0;
+        padding:0;
+      }
+
+      /* Mỗi .sheet = 1 trang 105×70mm, chia lưới 3 label 35×70mm */
+      .sheet{
+        width: var(--sheet-w);
+        height: var(--sheet-h);
+        display:grid;
+        grid-template-columns: repeat(3, var(--label-w));
+        grid-auto-rows: var(--label-h);
+        gap: 0;
+        background:#fff;
+        position: relative;
+        break-inside: avoid;
+        page-break-after: always;
+      }
+
+      /* 2 đường nét đứt ngăn 3 tem */
+      .sheet::before,
+      .sheet::after{
+        content:"";
+        position:absolute;
+        top:0; bottom:0;
+        width:0;
+        border-left:1px dashed #999;
+        pointer-events:none;
+      }
+      .sheet::before{ left: var(--label-w); }
+      .sheet::after{  left: calc(var(--label-w) * 2); }
+
+      /* Khung tem 35×70mm (chưa xoay nội dung) */
+      .label{
+        width: var(--label-w);
+        height: var(--label-h);
+        position: relative;
+        background:#fff;
+        overflow: hidden;
+      }
+
+      /* Vùng nội dung xoay: sau khi xoay sẽ thành 70×35mm */
+      .rotor{
+        position:absolute;
+        top:0;
+        left:0;
+        width:  var(--label-h);   /* 70mm */
+        height: var(--label-w);   /* 35mm */
+        transform-origin: top left;
+
+        /* Đầu tem về bên phải như template 3 tem */
+        transform: translateX(var(--label-w)) rotate(90deg);
+
+        padding: var(--pad);
+        box-sizing: border-box;
+
+        display:flex;
+        align-items:stretch;
+        justify-content:flex-start;
+      }
+
+      /* Bên trong rotor: layout giống mẫu VT_QR cũ – QR trái, Text phải */
+      .inner{
+        width:100%;
+        height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        gap: 3mm;
+      }
+
+      .qr{
+        flex: 0 0 var(--qr);
+        width: var(--qr);
+        height: var(--qr);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      }
+      .qr img{
+        display:block;
+        width:100% !important;
+        height:100% !important;
+      }
+
+      .text{
+        flex: 1 1 0;
+        min-width:0;
+        line-height:1.06;
+      }
+      .ma{
+        font-family: var(--font);
+        font-weight:700;
+        font-size:14pt;
+      }
+      .ten{
+        font-family: var(--font);
+        font-weight:700;
+        font-size:12pt;
+        text-transform:uppercase;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>HGPT STEEL — Tem VT_QR (3 tem/trang)</h1>
+    <div class="row">
+      <button id="btnPrint">🖨️ In tem VT_QR</button>
+      <span class="status" id="status">Sẵn sàng</span>
+    </div>
+    <div class="note">
+      Khổ in: <b>70×105mm</b> • <b>3 tem 70×35mm/trang</b> (xoay ngang).<br>
+      Dữ liệu từ bảng <b>VT_QR</b> (AppSheet). QR bên trái (từ <b>MAHANG</b>), bên phải: <b>MAHANG</b> &amp; <b>TENMAU</b> (in hoa), nhân bản theo <b>SL</b>.
+    </div>
+  </div>
+
+  <div class="print-container" id="printContainer"></div>
+
+  <script>
+    // ===== CẤU HÌNH APPSHEET VT_QR =====
+    const appId     = '977c97bd-47e4-441c-b564-fe28574e9d74';
+    const accessKey = 'V2-sJNk8-IQldL-7uQ80-Iekic-SvMjg-FPH9j-DFCgG-v97aL';
+    const region    = 'www'; // 'www', 'eu', ...
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const $             = (s)=>document.querySelector(s);
+      const statusEl      = $('#status');
+      const printContainer= $('#printContainer');
+      const btnPrint      = $('#btnPrint');
+
+      // Lấy dữ liệu VT_QR từ AppSheet
+      async function fetchVTQR() {
+        const url  = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/VT_QR/Action`;
+        const body = {
+          Action: 'Find',
+          Properties: {},
+          Selector: 'Filter(VT_QR, true)'
+        };
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'ApplicationAccessKey': accessKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const txt = await resp.text();
+        if (!resp.ok) {
+          throw new Error(`VT_QR HTTP ${resp.status} - ${txt.slice(0,200)}`);
+        }
+        const data = JSON.parse(txt);
+        if (!Array.isArray(data)) {
+          throw new Error('Dữ liệu VT_QR trả về không phải mảng.');
+        }
+        return data;
+      }
+
+      // Lấy giá trị theo nhiều tên khóa (case-insensitive)
+      function pick(obj, names) {
+        for (const n of names) {
+          if (obj[n] !== undefined && obj[n] !== null && obj[n] !== '') return obj[n];
+          const hit = Object.keys(obj).find(k => k.toLowerCase() === n.toLowerCase());
+          if (hit && obj[hit] !== '') return obj[hit];
+        }
+        return '';
+      }
+
+      // Tạo URL QR từ MAHANG
+      function qrURL(mahang, size=400) {
+        const v = (mahang || '').toString().trim();
+        return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(v)}`;
+      }
+
+      // Tạo 1 tem (label) theo layout 3-tem/xoay ngang
+      function makeLabel({ MAHANG, TENMAU }) {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerHTML = `
+          <div class="rotor">
+            <div class="inner">
+              <div class="qr">
+                <img src="${qrURL(MAHANG)}" alt="QR">
+              </div>
+              <div class="text">
+                <div class="ma">${MAHANG}</div>
+                <div class="ten">${(TENMAU || '').toString().toUpperCase()}</div>
+              </div>
+            </div>
+          </div>
+        `;
+        return label;
+      }
+
+      // Hàm in từ VT_QR, 3 tem/trang
+      async function printFromVTQR() {
+        statusEl.textContent = 'Đang tải dữ liệu VT_QR...';
+        printContainer.innerHTML = '';
+
+        let rows;
+        try {
+          rows = await fetchVTQR();
+        } catch (e) {
+          statusEl.textContent = 'Lỗi tải VT_QR';
+          alert('Không đọc được dữ liệu VT_QR:\n' + e.message);
+          return;
+        }
+
+        if (!rows.length) {
+          statusEl.textContent = 'Không có dữ liệu VT_QR.';
+          alert('Không có dữ liệu hợp lệ trong VT_QR.');
+          return;
+        }
+
+        statusEl.textContent = 'Đang tạo tem...';
+
+        let sheet = null;
+        let cell  = 0;   // đếm tem trên 1 trang (tối đa 3)
+        let total = 0;   // tổng số tem
+
+        for (const r of rows) {
+          const MAHANG = (pick(r, ['MAHANG','mahang','MÃ HÀNG']) || '').toString().trim();
+          const TENMAU = (pick(r, ['TENMAU','tenmau','Tên mẫu']) || '').toString().trim();
+          const SLraw  = pick(r, ['SL','sl','Số lượng']);
+          const SL     = Number.parseInt(SLraw || 1, 10) > 0 ? Number.parseInt(SLraw,10) : 1;
+
+          if (!MAHANG) continue;
+
+          for (let i = 0; i < SL; i++) {
+            // Tạo sheet mới nếu chưa có hoặc đã đủ 3 tem
+            if (!sheet || cell === 3) {
+              sheet = document.createElement('div');
+              sheet.className = 'sheet';
+              printContainer.appendChild(sheet);
+              cell = 0;
+            }
+
+            const labelEl = makeLabel({ MAHANG, TENMAU });
+            sheet.appendChild(labelEl);
+            cell++;
+            total++;
+          }
+        }
+
+        if (!total) {
+          statusEl.textContent = 'Không có bản ghi hợp lệ.';
+          alert('Có dữ liệu nhưng thiếu MAHANG/SL hợp lệ.');
+          return;
+        }
+
+        // Chờ ảnh QR load xong rồi mới in
+        const imgs = printContainer.querySelectorAll('img');
+        if (imgs.length) {
+          await Promise.all(
+            Array.from(imgs).map(img => new Promise(res => {
+              if (img.complete) res();
+              else {
+                img.onload  = () => res();
+                img.onerror = () => res();
+              }
+            }))
+          );
+        }
+
+        statusEl.textContent = `Đã tạo ${total} tem • mở hộp thoại in...`;
+        setTimeout(() => {
+          window.print();
+          statusEl.textContent = 'Sẵn sàng';
+        }, 120);
+      }
+
+      if (btnPrint) {
+        btnPrint.addEventListener('click', printFromVTQR);
+      }
+    });
+  </script>
+</body>
+</html>
