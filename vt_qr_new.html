@@ -175,7 +175,7 @@
     <h1>Tem Vật tư_QR (3 tem/trang)</h1>
     <div class="row">
       <button id="btnPrint">🖨️ In tem VT_QR</button>
-      <a id="sheetLink" href="#" class="link" target="_blank">🔗 Mở link Sheet nền</a>
+      <a id="sheetLink" href="#" class="link" target="_blank">🔗 Mở Sheet nền</a>
       <span class="status" id="status"><i class="fa-solid fa-check fa-xl" style="color:#004ffa;"></i> Sẵn sàng in rồi :)</span>
     </div>
     <div class="note">
@@ -199,6 +199,24 @@
       const statusEl      = $('#status');
       const printContainer= $('#printContainer');
       const btnPrint      = $('#btnPrint');
+
+      if (sheetLink) sheetLink.href = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit#gid=0`;
+
+    async function fetchSheetGViz(sheetId, sheetName){
+      const url  = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+      const resp = await fetch(url);
+      const text = await resp.text();
+      const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+      const headers = (json.table.cols || []).map((c, i) => (c && c.label) ? c.label : `Col${i+1}`);
+      const rows = [];
+      for (const r of json.table.rows){
+        if (!r || !r.c) continue;
+        const o = {};
+        headers.forEach((h, i) => { o[h] = r.c[i] ? (r.c[i].v ?? '') : ''; });
+        rows.push(o);
+      }
+      return rows;
+    }
 
       // Lấy dữ liệu VT_QR từ AppSheet
       async function fetchVTQR() {
