@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HGPT - Tem trình mẫu Dự án (70×105mm • 3 tem/trang • xoay ngang)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      /* Print config */
+      --sheet-w: 105mm;
+      --sheet-h: 70mm;
+      --label-w: 35mm;
+      --label-h: 70mm;
+      --pad: 3mm;
+      --font-print: "Times New Roman", Times, serif;
+
+      /* UI config */
+      --primary: #004ffa;
+      --primary-dark: #0037b3;
+      --accent: #ff7a00;
+      --accent-light: #fff3e6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)),
+        url('https://images.unsplash.com/photo-1541888946425-d81bb19480c5?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 650px;
+      margin: 20px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      height: 48px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 79, 250, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 79, 250, 0.3);
+    }
+
+    .btn-outline {
+      background: white;
+      color: var(--text-main);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #f0f7ff;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding: 8px 16px;
+      background: #f0fdf4;
+      color: #166534;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #dcfce7;
+      animation: pulse-green 2s infinite linear;
+    }
+
+    @keyframes pulse-green {
+      0% {
+        box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(22, 101, 52, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(22, 101, 52, 0);
+      }
+    }
+
+    .info-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 32px;
+      border: 1px dashed var(--border);
+    }
+
+    .info-card i {
+      color: var(--primary);
+      margin-right: 8px;
+    }
+
+    .info-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .info-card b {
+      color: var(--text-main);
+    }
+
+    /* Print logic remains untouched */
+    .print-container {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: var(--sheet-w) var(--sheet-h);
+        margin: 0;
+      }
+
+      body {
+        background: white;
+        display: block;
+      }
+
+      .wrap {
+        display: none !important;
+      }
+
+      .print-container {
+        display: block;
+        position: absolute;
+        inset: 0;
+        padding: 0;
+      }
+
+      .sheet {
+        width: var(--sheet-w);
+        height: var(--sheet-h);
+        display: grid;
+        grid-template-columns: repeat(3, var(--label-w));
+        grid-auto-rows: var(--label-h);
+        gap: 0;
+        background: #fff;
+        position: relative;
+        break-inside: avoid;
+        page-break-after: always;
+      }
+
+      .sheet::before,
+      .sheet::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        border-left: 1px dashed #999;
+        pointer-events: none;
+      }
+
+      .sheet::before {
+        left: var(--label-w);
+      }
+
+      .sheet::after {
+        left: calc(var(--label-w) * 2);
+      }
+
+      .label {
+        width: var(--label-w);
+        height: var(--label-h);
+        position: relative;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .rotor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--label-h);
+        height: var(--label-w);
+        transform-origin: top left;
+        transform: translateX(var(--label-w)) rotate(90deg);
+        top: 2mm;
+        display: flex;
+        flex-direction: column;
+        padding: 8mm 2mm 2mm 2mm;
+        box-sizing: border-box;
+      }
+
+      .text {
+        line-height: 1.06;
+        width: 100%;
+      }
+
+      .stt {
+        font-family: var(--font-print);
+        font-size: 7pt;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 1mm;
+      }
+
+      .ten {
+        font-family: var(--font-print);
+        font-weight: 700;
+        font-size: 12pt;
+        text-transform: uppercase;
+      }
+
+      .meta {
+        font-family: var(--font-print);
+        font-size: 9pt;
+        margin-top: 1mm;
+      }
+
+      .meta b {
+        font-weight: 700;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <img src="https://hgptsteel.com/wp-content/uploads/2025/06/cropped-HGPT-STEEL-1-1.png" alt="HGPT Logo"
+        class="logo">
+      <h1>Tem mẫu vật tư Dự án</h1>
+      <p class="subtitle">Hệ thống tạo tem tự động từ Google Sheets</p>
+    </header>
+
+    <div align="center">
+      <div class="status-badge" id="status">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Sẵn sàng kết nối dữ liệu</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnPrint" class="btn btn-primary">
+        <i class="fa-solid fa-print"></i> IN TEM NGAY
+      </button>
+      <a id="sheetLink" href="#" class="btn btn-outline" target="_blank">
+        <i class="fa-solid fa-table-columns"></i> Dữ liệu nguồn
+      </a>
+    </div>
+
+    <div class="info-card">
+      <p>
+        <i class="fa-solid fa-circle-info"></i>
+        Dữ liệu được lấy từ sheet <b>"Sheet1"</b>. Hệ thống sẽ tự động sắp xếp theo <b>STT</b> và tạo <b>3 tem/trang</b>
+        tiêu chuẩn (70x105mm).
+      </p>
+    </div>
+  </div>
+
+  <div class="print-container" id="printContainer"></div>
+
+  <script>
+    const GOOGLE_SHEET_ID = '1NfxVAG9r1i6-Kb5GoxPSQ9yN2RmEi6SLeNlVRFzHAE0';
+    const SHEET_NAME = 'Sheet1';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (s) => document.querySelector(s);
+      const statusEl = $('#status');
+      const printContainer = $('#printContainer');
+      const sheetLink = $('#sheetLink');
+      const btnPrint = $('#btnPrint');
+
+      if (sheetLink) sheetLink.href = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit#gid=0`;
+
+      async function fetchSheetGViz(sheetId, sheetName) {
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+        const resp = await fetch(url);
+        const text = await resp.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        const headers = (json.table.cols || []).map((c, i) => (c && c.label) ? c.label : `Col${i + 1}`);
+        const rows = [];
+        for (const r of json.table.rows) {
+          if (!r || !r.c) continue;
+          const o = {};
+          headers.forEach((h, i) => { o[h] = r.c[i] ? (r.c[i].v ?? '') : ''; });
+          rows.push(o);
+        }
+        return rows;
+      }
+
+      const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+      function pick(obj, names) {
+        const keys = Object.keys(obj);
+        for (const want of names) {
+          const hitKey = keys.find(k => norm(k) === norm(want));
+          if (hitKey !== undefined) return obj[hitKey];
+        }
+        return '';
+      }
+
+      function makeLabel({ STT, CHUNGLOAI, VATLIEU, VITRI }) {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerHTML = `
+        <div class="rotor">
+          <div class="text">
+            <div class="stt">STT: ${STT || ''}</div>
+            <div class="ten">${(CHUNGLOAI || '').toString().toUpperCase()}</div>
+            <div class="meta">
+              <b>Vật liệu:</b> ${VATLIEU || ''} &nbsp;|&nbsp;
+              <b>Note:</b> ${VITRI || ''}
+            </div>
+          </div>
+        </div>`;
+        return label;
+      }
+
+      async function printFromSheet() {
+        statusEl.textContent = 'Đang tải dữ liệu Sheet...';
+        printContainer.innerHTML = '';
+
+        let rows;
+        try { rows = await fetchSheetGViz(GOOGLE_SHEET_ID, SHEET_NAME); }
+        catch (e) {
+          statusEl.textContent = 'Lỗi tải Sheet';
+          alert('Không đọc được dữ liệu Google Sheet:\n' + e.message);
+          return;
+        }
+        if (!rows.length) {
+          statusEl.textContent = 'Không có dữ liệu.';
+          alert('Sheet trống hoặc không có hàng dữ liệu.');
+          return;
+        }
+
+        rows.sort((a, b) => (Number(pick(a, ['STT', 'stt'])) || 0) - (Number(pick(b, ['STT', 'stt'])) || 0));
+
+        statusEl.textContent = 'Đang tạo tem...';
+
+        let sheet = null, cell = 0, total = 0;
+
+        for (const r of rows) {
+          const STT = pick(r, ['STT', 'stt']);
+          const CHUNGLOAI = String(pick(r, ['CHUNGLOAI', 'CHUNGLOAI-QUYCACH', 'Chủng loại', 'chungloai']) || '').trim();
+          const VATLIEU = String(pick(r, ['VATLIEU', 'Vật liệu', 'vatlieu']) || '').trim();
+          const VITRI = String(pick(r, ['VITRI', 'Vị trí', 'vitri']) || '').trim();
+          const SLraw = pick(r, ['SOLUONG', 'Soluong', 'SL', 'soluong']);
+          const SL = parseInt(SLraw, 10);
+
+          if (!SLraw || isNaN(SL) || SL <= 0) continue;
+          if (!CHUNGLOAI) continue;
+
+          for (let i = 0; i < SL; i++) {
+            if (!sheet || cell === 3) {
+              sheet = document.createElement('div');
+              sheet.className = 'sheet';
+              printContainer.appendChild(sheet);
+              cell = 0;
+            }
+            sheet.appendChild(makeLabel({ STT, CHUNGLOAI, VATLIEU, VITRI }));
+            cell++; total++;
+          }
+        }
+
+        if (!total) {
+          statusEl.textContent = 'Không có bản ghi hợp lệ.';
+          alert('Thiếu CHUNGLOAI hoặc SOLUONG = 0 ở mọi hàng.');
+          return;
+        }
+
+        statusEl.textContent = `Đã tạo ${total} tem • mở hộp thoại in...`;
+        setTimeout(() => { window.print(); statusEl.textContent = 'Sẵn sàng'; }, 120);
+      }
+
+      if (btnPrint) btnPrint.addEventListener('click', printFromSheet);
+    });
+  </script>
+</body>
+
+</html>
