@@ -546,7 +546,7 @@
                 margin: 0;
             }
 
-            /* Mỗi tem chiếm toàn bộ trang 105mm x 70mm */
+            /* Mỗi tem chiếm toàn bộ trang 105mm x 70mm - Chừa vùng in sẵn logo HGPT (trên) và www.hgpt.vn (dưới) */
             .label-page {
                 width: 105mm;
                 height: 70mm;
@@ -554,7 +554,7 @@
                 page-break-before: avoid;
                 page-break-inside: avoid;
                 margin: 0;
-                padding: 3mm 4mm;
+                padding: 13mm 4mm 9mm 4mm;
                 box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
@@ -570,15 +570,15 @@
             /* Header - Tên khách hàng */
             .label-header {
                 width: 100%;
-                font-size: 15px;
+                font-size: 13px;
                 font-weight: bold;
-                line-height: 1.3;
+                line-height: 1.2;
                 color: #000;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
-                border-bottom: 1.5px solid #000;
-                padding-bottom: 2mm;
-                margin-bottom: 2mm;
+                border-bottom: 1px solid #000;
+                padding-bottom: 1.2mm;
+                margin-bottom: 1.5mm;
             }
 
             /* Container chính chứa thông tin và QR code */
@@ -596,59 +596,59 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                gap: 2.5mm;
+                gap: 1.5mm;
             }
 
             /* Tên sản phẩm */
             .label-info .ten_sp {
-                font-size: 16px;
+                font-size: 14px;
                 color: #000;
                 word-wrap: break-word;
-                line-height: 1.25;
+                line-height: 1.2;
             }
 
             /* Mã cấu kiện */
             .label-info .component-name {
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: bold;
                 color: #000;
                 word-wrap: break-word;
-                line-height: 1.2;
-                margin-top: 1mm;
+                line-height: 1.15;
+                margin-top: 0.5mm;
             }
 
             /* Quy cách / Thông tin bổ sung */
             .label-info .additional-info {
-                font-size: 14px;
+                font-size: 13px;
                 color: #000;
                 font-weight: bold;
                 word-wrap: break-word;
-                line-height: 1.25;
-                margin-top: 1mm;
+                line-height: 1.2;
+                margin-top: 0.5mm;
             }
 
             /* Container QR code bên phải */
             .qr-container {
-                width: 26mm;
+                width: 24mm;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 1.5mm;
+                gap: 1mm;
                 flex-shrink: 0;
             }
 
-            /* Kích thước QR code phóng to cân đối cho khổ 105x70mm */
+            /* Kích thước QR code cân đối trong vùng trắng 48mm */
             .qr-container img {
-                width: 22mm !important;
-                height: 22mm !important;
-                max-width: 22mm !important;
-                max-height: 22mm !important;
+                width: 19mm !important;
+                height: 19mm !important;
+                max-width: 19mm !important;
+                max-height: 19mm !important;
             }
 
             .qr-placeholder {
-                width: 22mm;
-                height: 22mm;
+                width: 19mm;
+                height: 19mm;
                 border: 2px dashed #ccc;
                 display: flex;
                 align-items: center;
@@ -659,7 +659,7 @@
 
             /* ID đơn hàng chi tiết dưới QR code */
             .qr-code-id {
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: bold;
                 color: #000;
                 line-height: 1.1;
